@@ -1,0 +1,33 @@
+{
+  "name": "react-resource",
+  "version": "1.0.0",
+  "description": "Component for building/creating restful api requests",
+  "scripts": {
+    "build": "babel ./react-resource.js -o dist/react-resource.js"
+  },
+  "main": "dist/react-resource.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cidevant/react-resource.git"
+  },
+  "keywords": [
+    "React",
+    "RefluxJs",
+    "Resource",
+    "Api",
+    "Promise",
+    "Api"
+  ],
+  "author": "Cidevant Von Goethe <cidevant@mail.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cidevant/react-resource/issues"
+  },
+  "homepage": "https://github.com/cidevant/react-resource#readme",
+  "dependencies": {
+    "babel": "^5.8.23",
+    "lodash": "^3.10.1",
+    "promise": "^7.0.4",
+    "superagent": "^1.4.0"
+  }
+}
