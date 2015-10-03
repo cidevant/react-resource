@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Component for building/creating restful api requests",
   "scripts": {
-    "build": "babel ./react-resource.js -o dist/react-resource.js"
+    "build": "babel ./react-resource.js -o dist/react-resource.js",
+    "prepublish": "npm run build"
   },
   "main": "dist/react-resource.js",
   "repository": {
