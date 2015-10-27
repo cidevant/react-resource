@@ -119,14 +119,14 @@ var ActionsBuilder = (function () {
         // Send
         newRequest.end(function (err, res) {
           if (err === null) {
-            resolvePromiseFn(res.body);
+            resolvePromiseFn(res && res.body);
             if (promiseConfig.resolveFn && typeof promiseConfig.resolveFn == 'function') {
-              promiseConfig.resolveFn(res.body);
+              promiseConfig.resolveFn(res && res.body);
             }
           } else {
-            rejectPromiseFn(res.body);
+            rejectPromiseFn(res && res.body || err);
             if (promiseConfig.rejectFn && typeof promiseConfig.rejectFn == 'function') {
-              promiseConfig.rejectFn(res.body);
+              promiseConfig.rejectFn(res && res.body || err);
             }
           }
         });
