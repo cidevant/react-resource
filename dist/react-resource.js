@@ -95,17 +95,17 @@ var ActionsBuilder = (function () {
         // Create
         switch (actionMethod) {
           case 'GET':
-            newRequest = newRequest.get(promiseConfig.url);
+            newRequest = newRequest.get(actionConfig.url);
             break;
           case 'POST':
-            newRequest = newRequest.post(promiseConfig.url);
+            newRequest = newRequest.post(actionConfig.url);
             break;
           case 'PUT':
           case 'PATCH':
-            newRequest = newRequest.put(promiseConfig.url);
+            newRequest = newRequest.put(actionConfig.url);
             break;
           case 'DELETE':
-            newRequest = newRequest.del(promiseConfig.url);
+            newRequest = newRequest.del(actionConfig.url);
             break;
         }
         // JSON
