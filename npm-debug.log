@@ -1,0 +1,105 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'publish' ]
+2 info using npm@3.3.7
+3 info using node@v0.12.4
+4 verbose node symlink /usr/local/bin/node
+5 verbose publish [ '.' ]
+6 silly cache add args [ '.', null ]
+7 verbose cache add spec .
+8 silly cache add parsed spec { raw: '.',
+8 silly cache add   scope: null,
+8 silly cache add   name: null,
+8 silly cache add   rawSpec: '.',
+8 silly cache add   spec: '/Users/katz/Code/JavaScript/cidevant@github.com/react-resource',
+8 silly cache add   type: 'directory' }
+9 verbose addLocalDirectory /Users/katz/.npm/react-resource/1.0.4/package.tgz not in flight; packing
+10 info lifecycle react-resource@1.0.4~prepublish: react-resource@1.0.4
+11 verbose lifecycle react-resource@1.0.4~prepublish: unsafe-perm in lifecycle true
+12 verbose lifecycle react-resource@1.0.4~prepublish: PATH: /usr/local/lib/python2.7/site-packages:/usr/local/share/python:/usr/local/lib/python2.7/site-packages:/usr/local/share/python:/Users/katz/.rvm/gems/ruby-2.1.5/bin:/Users/katz/.rvm/gems/ruby-2.1.5@global/bin:/Users/katz/.rvm/rubies/ruby-2.1.5/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/katz/.rvm/bin:/Users/katz/Code/Go/bin:/Users/katz/Library/Haskell/bin:/Users/katz/Code/Go/bin:/Users/katz/Library/Haskell/bin
+13 verbose lifecycle react-resource@1.0.4~prepublish: CWD: /Users/katz/Code/JavaScript/cidevant@github.com/react-resource
+14 silly lifecycle react-resource@1.0.4~prepublish: Args: [ '-c', 'babel ./react-resource.js -o dist/react-resource.js' ]
+15 silly lifecycle react-resource@1.0.4~prepublish: Returned: code: 0  signal: null
+16 verbose tar pack [ '/Users/katz/.npm/react-resource/1.0.4/package.tgz',
+16 verbose tar pack   '/Users/katz/Code/JavaScript/cidevant@github.com/react-resource' ]
+17 verbose tarball /Users/katz/.npm/react-resource/1.0.4/package.tgz
+18 verbose folder /Users/katz/Code/JavaScript/cidevant@github.com/react-resource
+19 verbose addLocalTarball adding from inside cache /Users/katz/.npm/react-resource/1.0.4/package.tgz
+20 silly cache afterAdd react-resource@1.0.4
+21 verbose afterAdd /Users/katz/.npm/react-resource/1.0.4/package/package.json not in flight; writing
+22 verbose afterAdd /Users/katz/.npm/react-resource/1.0.4/package/package.json written
+23 silly publish { name: 'react-resource',
+23 silly publish   version: '1.0.4',
+23 silly publish   description: 'Component for building/creating restful api requests',
+23 silly publish   scripts:
+23 silly publish    { build: 'babel ./react-resource.js -o dist/react-resource.js',
+23 silly publish      prepublish: 'babel ./react-resource.js -o dist/react-resource.js' },
+23 silly publish   main: 'dist/react-resource.js',
+23 silly publish   repository:
+23 silly publish    { type: 'git',
+23 silly publish      url: 'git+ssh://git@github.com/cidevant/react-resource.git' },
+23 silly publish   keywords: [ 'React', 'RefluxJs', 'Resource', 'Api', 'Promise', 'Api' ],
+23 silly publish   author: { name: 'Cidevant Von Goethe', email: 'cidevant@mail.ru' },
+23 silly publish   license: 'MIT',
+23 silly publish   bugs: { url: 'https://github.com/cidevant/react-resource/issues' },
+23 silly publish   homepage: 'https://github.com/cidevant/react-resource#readme',
+23 silly publish   dependencies:
+23 silly publish    { babel: '^5.8.23',
+23 silly publish      lodash: '^3.10.1',
+23 silly publish      promise: '^7.0.4',
+23 silly publish      superagent: '^1.4.0' },
+23 silly publish   readme: '# React Resource\nA factory which creates a resource object that lets you interact with RESTful server-side data sources.\n\nThe returned resource object has action methods which provide high-level behaviors without the need to interact with the low level http service (superagent).\n\n## Usage\n\n### Creating "ResourceClass"\n\n`var ResourceClass = new ReactResource(url, [mappings, [customActions]])`\n\nInput:\n* __url__: string - Api endpoint url\n```js\n\'/api/users/{:urlVariable}\'\n```\n* __mappings__: object - Replace variables in url by object values\n```js\n{ instanceObjectAttribute: ":urlVariable"}\n```\n* __customActions__: object - Custom actions config\n```js\n{\n  actionName: {\n    url: "string",\n    method: "string",\n    params: {\n      defaultParam: "defaultValue"\n    }\n  }\n}\n```\n\nOutput:\n\n* __ResourceClass__: function - instance constructor function with default actions (ClassMethods)\n\n### Class Methods vs. Instance Methods\n\nThere are 5 default actions:\n```\n{ \'query\':    {method:\'GET\'},\n  \'get\':      {method:\'GET\'},\n  \'create\':   {method:\'POST\'},\n  \'update\':   {method:\'PUT\'},\n  \'delete\':   {method:\'DELETE\'} };\n```\n\n##### ClassMethods\n\n`var promise = User.get([initObject, [queryParams, [bodyParams, [resolveFn, [rejectFn]]]]])`\n\n##### InstanceMethods\n\nAre prefixed with `$` dollar sign. You dont have to pass `initObject`, because you have already\ninstatiated "ResourceClass".\n\n`var promise = new User(initObject).$get([queryParams, [bodyParams, [resolveFn, [rejectFn]]]])`\n\n##### Promise resolve and reject function\n\nIf we send functions os first argument, we ommit resource settings and directly passing arguments functions to `new Promise(arguments)`.\n\n```js\nvar promise = User.query(responseFn)\n\n/* or */\n\nvar promise = User.query(responseFn, rejectFn)\n```\n\n## Examples\n\n#### Basic (ClassMethods vs InstanceMethods)\n\n```js\nimport ReactResource    from \'react-resource\';\n\nvar User = new ReactResource(\'/api/users/{:id}\', {id: \':id\'}),\n    userReal,\n    successResponseCallback = function(response){\n      userReal = response;\n      console.log("User promise resolved with data", response);\n    };\n\n// 1) Resource class method call\nvar promise = User.get({id: 10}, successResponseCallback);\n\npromise.then(function(response){\n  console.log("Say hello to user", response);\n});\n\n/* or */\n\n// 2) Resource instance method (prefixed with `$`) call\nvar userInstance = new User({id: 10});\nvar promise = userInstance.$get();\n\npromise.then(successResponseCallback)\n```\n\n#### RefluxJs integration\n\n```js\nimport React            from \'react\';\nimport Reflux           from \'reflux\';\nimport ReactResource    from \'react-resource\';\n\nvar User = new ReactResource(\'/api/users/{:id}\', {id: \':id\'});\n\nvar HomeActions = Reflux.createActions({\n  \'loadUsers\':                 {asyncResult: true}\n});\n\nHomeActions.loadUsers.listenAndPromise( User.query );\n\nvar HomeComponent = React.createClass({\n  mixins: [\n    Reflux.listenTo(HomeActions.loadUsers.completed, \'onLoadUsersCompleted\')\n  ],\n\n  getInitialState(){\n    return { users: [] };\n  },\n\n  componentDidMount() {\n    HomeActions.loadUsers();\n  },\n\n  onLoadUsersCompleted(response){\n    this.setState({users: response})\n  },\n\n  render(){\n    return (\n      <div>Users count: {this.state.users && this.state.users.length}</div>\n    )\n  }\n});\n\n```\n\n#### Override default and custom actions\n```js\nimport ReactResource    from \'react-resource\';\n\nvar User = new ReactResource(\'/api/users/{:id}\', {id: \':id\'}, {\n  // 1) Override default settings of default actions\n  query: {\n    params: {\n      offset: 0,\n      limit: 10\n    }\n  },\n  // 2) Create new action\n  myCustomAction: {\n    url: "/api/custom_action",\n    method: "PUT",\n    params: {\n      defaultParam1: "Hello",\n      defaultParam2: "World"\n    }\n  }\n});\n\n// 1) url: /api/users?offset=0&limit=10\nvar promise = User.query();\n\n/* or */\n\n// 2) url: /api/custom_action?defaultParam1=Hello&defaultParam2=World\n\n// 2.1) Class method call\nvar promise = User.myCustomAction({});\n\n// 2.1) Instance method call\nvar userInstance = new User({});\nvar promise = userInstance.$myCustomAction();\n```',
+23 silly publish   readmeFilename: 'README.md',
+23 silly publish   gitHead: 'ee81861eadc6d10b005c0b90ec512fdfa4d3495a',
+23 silly publish   _id: 'react-resource@1.0.4',
+23 silly publish   _shasum: 'fd66b5e2bcb269405f27873e3e24be9a1e4fbc4f',
+23 silly publish   _from: '.' }
+24 verbose getPublishConfig undefined
+25 silly mapToRegistry name react-resource
+26 silly mapToRegistry using default registry
+27 silly mapToRegistry registry https://registry.npmjs.org/
+28 silly mapToRegistry uri https://registry.npmjs.org/react-resource
+29 verbose publish registryBase https://registry.npmjs.org/
+30 silly publish uploading /Users/katz/.npm/react-resource/1.0.4/package.tgz
+31 verbose request uri https://registry.npmjs.org/react-resource
+32 verbose request sending authorization for write operation
+33 info attempt registry request try #1 at 19:58:30
+34 verbose request using bearer token for auth
+35 verbose request id 98d7b6306625878a
+36 http request PUT https://registry.npmjs.org/react-resource
+37 http 403 https://registry.npmjs.org/react-resource
+38 verbose headers { 'content-type': 'application/json',
+38 verbose headers   'cache-control': 'max-age=60',
+38 verbose headers   'content-length': '95',
+38 verbose headers   'accept-ranges': 'bytes',
+38 verbose headers   date: 'Fri, 30 Oct 2015 18:58:34 GMT',
+38 verbose headers   via: '1.1 varnish',
+38 verbose headers   connection: 'keep-alive',
+38 verbose headers   'x-served-by': 'cache-ams4133-AMS',
+38 verbose headers   'x-cache': 'MISS',
+38 verbose headers   'x-cache-hits': '0',
+38 verbose headers   'x-timer': 'S1446231513.103067,VS0,VE1383' }
+39 verbose request invalidating /Users/katz/.npm/registry.npmjs.org/react-resource on PUT
+40 error publish Failed PUT 403
+41 verbose stack Error: "You cannot publish over the previously published version 1.0.4." : react-resource
+41 verbose stack     at makeError (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+41 verbose stack     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:252:14)
+41 verbose stack     at Request._callback (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+41 verbose stack     at Request.self.callback (/usr/local/lib/node_modules/npm/node_modules/request/request.js:198:22)
+41 verbose stack     at Request.emit (events.js:110:17)
+41 verbose stack     at Request.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1063:14)
+41 verbose stack     at Request.emit (events.js:129:20)
+41 verbose stack     at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1009:12)
+41 verbose stack     at IncomingMessage.emit (events.js:129:20)
+41 verbose stack     at _stream_readable.js:908:16
+42 verbose statusCode 403
+43 verbose pkgid react-resource
+44 verbose cwd /Users/katz/Code/JavaScript/cidevant@github.com/react-resource
+45 error Darwin 15.0.0
+46 error argv "node" "/usr/local/bin/npm" "publish"
+47 error node v0.12.4
+48 error npm  v3.3.7
+49 error code E403
+50 error "You cannot publish over the previously published version 1.0.4." : react-resource
+51 error If you need help, you may report this error at:
+51 error     <https://github.com/npm/npm/issues>
+52 verbose exit [ 1, true ]
