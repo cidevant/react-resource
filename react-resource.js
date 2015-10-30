@@ -307,15 +307,8 @@ class HelpersAndParsers {
       break;
       case 1:
         if(typeof args[0] == 'object') {
-          // class    - someAction(source) (if mappings present)
-          // class    - someAction(queryParams) (without mappings)
-          if(isClassMethod) {
-            if(HelpersAndParsers.isMappingsPresentInUrl(promiseConfig.url)) {
-              promiseConfig.source = args[0];
-            } else {
-              promiseConfig.queryParams = args[0];
-            }
-          }
+          // class    - someAction(source)
+          if(isClassMethod) { promiseConfig.source = args[0]; }
           // instance - someAction(queryParams)
           else { promiseConfig.queryParams = args[0]; }
         } else {
