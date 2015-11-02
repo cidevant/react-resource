@@ -47,7 +47,6 @@ class ActionsBuilder {
       let promiseConfig = HelpersAndParsers.parseArgs(actionName,
                                                       resourceConfig,
                                                       ModelInstance,
-                                                      HelpersAndParsers.getDefaultPromiseConfig(),
                                                       ...args);
       return ActionsBuilder.buildPromiseFromAction(actionName, resourceConfig, promiseConfig);
     }
@@ -150,6 +149,9 @@ class ResourceConfig {
     if(_.isEmpty(actionConfig.method)) {
       this.actionsConfig[actionName].method = 'GET';
     }
+    if(_.isNull(actionConfig.isArray) || _.isUndefined(actionConfig.isArray)) {
+      this.actionsConfig[actionName].isArray = false;
+    }
   }
 }
 
@@ -158,34 +160,35 @@ class ResourceConfig {
 
 class HelpersAndParsers {
   // Parse action arguments
-  static parseArgs(actionName, resourceConfig, ModelInstance = {}, promiseConfig, ...args){
+  static parseArgs(actionName, resourceConfig, ModelInstance = {}, ...args){
+    let promiseConfig = _.cloneDeep(HelpersAndParsers.getDefaultPromiseConfig()),
+        actionConfig  = resourceConfig.actionsConfig &&
+                        resourceConfig.actionsConfig[actionName],
+        actionMethod  = actionConfig && actionConfig.method.toUpperCase();
 
-    let actionConfig = resourceConfig.actionsConfig &&
-                       resourceConfig.actionsConfig[actionName],
-        actionMethod = actionConfig && actionConfig.method.toUpperCase();
-
+    // WITH BODY
     if(ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
-      HelpersAndParsers.WithBodyData(resourceConfig, promiseConfig, ModelInstance, ...args);
+      HelpersAndParsers.WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args);
 
-      if(!_.isEmpty(promiseConfig.source) &&
-          _.isEmpty(promiseConfig.bodyData)) {
+      if(!_.isEmpty(promiseConfig.source) && _.isEmpty(promiseConfig.bodyData)) {
         HelpersAndParsers.copyPureAttributes(promiseConfig.source, promiseConfig.bodyData);
       }
     } else
+
+    // NO BODY
     if(ACTIONS_WITHOUT_BODY.indexOf(actionMethod) > -1) {
-      HelpersAndParsers.NoBodyData(resourceConfig, promiseConfig, ModelInstance, ...args);
+      HelpersAndParsers.NoBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args);
     } else {
       throw Error("Dont know how to build HTTP request.", actionName, actionMethod);
     }
-    promiseConfig.url = HelpersAndParsers.parseUrlWithMapping(actionConfig.url,
-                                                              resourceConfig.mappings,
-                                                              promiseConfig.source);
+
+    promiseConfig.url = HelpersAndParsers.parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig);
     return promiseConfig;
   }
 
   // Parser for methods WITH BodyContent
   // const ACTIONS_WITH_BODY
-  static WithBodyData(resourceConfig, promiseConfig, ModelInstance, ...args) {
+  static WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args) {
     let isClassMethod = _.isEmpty(ModelInstance);
     // instance method - should insert INSTANCE in source
     if(!isClassMethod) { promiseConfig.source = ModelInstance; }
@@ -323,8 +326,10 @@ class HelpersAndParsers {
 
   // Parser for methods WITHOUT BodyContent
   // const ACTIONS_WITHOUT_BODY
-  static NoBodyData(resourceConfig, promiseConfig, ModelInstance, ...args) {
-    let isClassMethod = _.isEmpty(ModelInstance);
+  static NoBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args) {
+    let isClassMethod = _.isEmpty(ModelInstance),
+        actionConfig  = resourceConfig.actionsConfig[actionName];
+
     // instance method - should insert INSTANCE in source
     if(!isClassMethod) { promiseConfig.source = ModelInstance; }
     switch(args.length){
@@ -401,7 +406,7 @@ class HelpersAndParsers {
           // class    - someAction(source)      (if mapping present)
           // class    - someAction(queryParams) (without mapping)
           if(isClassMethod){
-            if(HelpersAndParsers.isMappingsPresentInUrl(promiseConfig.url)) {
+            if(actionConfig.isArray == false) {
               promiseConfig.source = args[0];
             } else {
               promiseConfig.queryParams = args[0];
@@ -420,17 +425,17 @@ class HelpersAndParsers {
   }
 
   // Parse action url and replace mappings with source values
-  static parseUrlWithMapping(url, mappings, source) {
-    let outputUrl = _.clone(url);
+  static parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig) {
+    let outputUrl = _.clone(actionConfig.url);
     // Loop mappings, collect values from source, replace in url if exists
-    for(var object_key in mappings) {
-      let sourceValue = source[object_key];
+    for(var object_key in resourceConfig.mappings) {
+      let sourceValue = promiseConfig.source[object_key];
       // Replace mapping key by source value if exists source value
       if(sourceValue) {
-        outputUrl = outputUrl.replace(new RegExp(`\{${mappings[object_key]}\}`, 'g'), sourceValue);
+        outputUrl = outputUrl.replace(new RegExp(`\{${resourceConfig.mappings[object_key]}\}`, 'g'), sourceValue);
       }
       // Delete mapping key from url
-      else { outputUrl = outputUrl.replace(new RegExp(`\/?\{${mappings[object_key]}\}`, 'g'), ""); }
+      else { outputUrl = outputUrl.replace(new RegExp(`\/?\{${resourceConfig.mappings[object_key]}\}`, 'g'), ""); }
     }
     // Clear URL from unmatched mappings
     outputUrl = outputUrl.replace(/\/?\{\:.+\}/i, "");
@@ -462,11 +467,6 @@ class HelpersAndParsers {
     return targetObject;
   }
 
-  static isMappingsPresentInUrl(inputUrl = ""){
-    let regex = /\/?\{\:.+\}/gi;
-    return !!regex.exec(inputUrl);
-  }
-
   // Extract QueryParams from URL
   static extractQueryParams(inputUrl = ""){
     let regex   = /[?&]([^=#]+)=([^&#]*)/g,
@@ -495,11 +495,11 @@ class HelpersAndParsers {
 // Constants
 
 const DEFAULT_ACTIONS_CONFIG = {
-  'query':   {url: null, params: {}, method:'GET'    },
-  'get':     {url: null, params: {}, method:'GET'    },
-  'create':  {url: null, params: {}, method:'POST'   },
-  'update':  {url: null, params: {}, method:'PUT'    },
-  'delete':  {url: null, params: {}, method:'DELETE' }
+  'query':   {url: null, params: {}, method:'GET'   , isArray: true  },
+  'get':     {url: null, params: {}, method:'GET'   , isArray: false },
+  'create':  {url: null, params: {}, method:'POST'  , isArray: false },
+  'update':  {url: null, params: {}, method:'PUT'   , isArray: false },
+  'delete':  {url: null, params: {}, method:'DELETE', isArray: false }
 };
 const ACTIONS_WITH_BODY    = ['POST', 'PUT', 'PATCH', 'DELETE'];
 const ACTIONS_WITHOUT_BODY = ['GET'];

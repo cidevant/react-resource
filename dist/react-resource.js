@@ -81,7 +81,7 @@ var ActionsBuilder = (function () {
           args[_key] = arguments[_key];
         }
 
-        var promiseConfig = HelpersAndParsers.parseArgs.apply(HelpersAndParsers, [actionName, resourceConfig, ModelInstance, HelpersAndParsers.getDefaultPromiseConfig()].concat(args));
+        var promiseConfig = HelpersAndParsers.parseArgs.apply(HelpersAndParsers, [actionName, resourceConfig, ModelInstance].concat(args));
         return ActionsBuilder.buildPromiseFromAction(actionName, resourceConfig, promiseConfig);
       };
     }
@@ -196,6 +196,9 @@ var ResourceConfig = (function () {
       if (_lodash2['default'].isEmpty(actionConfig.method)) {
         this.actionsConfig[actionName].method = 'GET';
       }
+      if (_lodash2['default'].isNull(actionConfig.isArray) || _lodash2['default'].isUndefined(actionConfig.isArray)) {
+        this.actionsConfig[actionName].isArray = false;
+      }
     }
   }]);
 
@@ -214,28 +217,35 @@ var HelpersAndParsers = (function () {
     key: 'parseArgs',
 
     // Parse action arguments
-    value: function parseArgs(actionName, resourceConfig, ModelInstance, promiseConfig) {
-      if (ModelInstance === undefined) ModelInstance = {};
+    value: function parseArgs(actionName, resourceConfig) {
+      var ModelInstance = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      var actionConfig = resourceConfig.actionsConfig && resourceConfig.actionsConfig[actionName],
+      var promiseConfig = _lodash2['default'].cloneDeep(HelpersAndParsers.getDefaultPromiseConfig()),
+          actionConfig = resourceConfig.actionsConfig && resourceConfig.actionsConfig[actionName],
           actionMethod = actionConfig && actionConfig.method.toUpperCase();
 
-      for (var _len2 = arguments.length, args = Array(_len2 > 4 ? _len2 - 4 : 0), _key2 = 4; _key2 < _len2; _key2++) {
-        args[_key2 - 4] = arguments[_key2];
+      // WITH BODY
+
+      for (var _len2 = arguments.length, args = Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+        args[_key2 - 3] = arguments[_key2];
       }
 
       if (ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
-        HelpersAndParsers.WithBodyData.apply(HelpersAndParsers, [resourceConfig, promiseConfig, ModelInstance].concat(args));
+        HelpersAndParsers.WithBodyData.apply(HelpersAndParsers, [actionName, resourceConfig, promiseConfig, ModelInstance].concat(args));
 
         if (!_lodash2['default'].isEmpty(promiseConfig.source) && _lodash2['default'].isEmpty(promiseConfig.bodyData)) {
           HelpersAndParsers.copyPureAttributes(promiseConfig.source, promiseConfig.bodyData);
         }
-      } else if (ACTIONS_WITHOUT_BODY.indexOf(actionMethod) > -1) {
-        HelpersAndParsers.NoBodyData.apply(HelpersAndParsers, [resourceConfig, promiseConfig, ModelInstance].concat(args));
-      } else {
-        throw Error("Dont know how to build HTTP request.", actionName, actionMethod);
-      }
-      promiseConfig.url = HelpersAndParsers.parseUrlWithMapping(actionConfig.url, resourceConfig.mappings, promiseConfig.source);
+      } else
+
+        // NO BODY
+        if (ACTIONS_WITHOUT_BODY.indexOf(actionMethod) > -1) {
+          HelpersAndParsers.NoBodyData.apply(HelpersAndParsers, [actionName, resourceConfig, promiseConfig, ModelInstance].concat(args));
+        } else {
+          throw Error("Dont know how to build HTTP request.", actionName, actionMethod);
+        }
+
+      promiseConfig.url = HelpersAndParsers.parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig);
       return promiseConfig;
     }
 
@@ -243,15 +253,15 @@ var HelpersAndParsers = (function () {
     // const ACTIONS_WITH_BODY
   }, {
     key: 'WithBodyData',
-    value: function WithBodyData(resourceConfig, promiseConfig, ModelInstance) {
+    value: function WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance) {
       var isClassMethod = _lodash2['default'].isEmpty(ModelInstance);
       // instance method - should insert INSTANCE in source
       if (!isClassMethod) {
         promiseConfig.source = ModelInstance;
       }
 
-      for (var _len3 = arguments.length, args = Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
-        args[_key3 - 3] = arguments[_key3];
+      for (var _len3 = arguments.length, args = Array(_len3 > 4 ? _len3 - 4 : 0), _key3 = 4; _key3 < _len3; _key3++) {
+        args[_key3 - 4] = arguments[_key3];
       }
 
       switch (args.length) {
@@ -392,15 +402,17 @@ var HelpersAndParsers = (function () {
     // const ACTIONS_WITHOUT_BODY
   }, {
     key: 'NoBodyData',
-    value: function NoBodyData(resourceConfig, promiseConfig, ModelInstance) {
-      var isClassMethod = _lodash2['default'].isEmpty(ModelInstance);
+    value: function NoBodyData(actionName, resourceConfig, promiseConfig, ModelInstance) {
+      var isClassMethod = _lodash2['default'].isEmpty(ModelInstance),
+          actionConfig = resourceConfig.actionsConfig[actionName];
+
       // instance method - should insert INSTANCE in source
       if (!isClassMethod) {
         promiseConfig.source = ModelInstance;
       }
 
-      for (var _len4 = arguments.length, args = Array(_len4 > 3 ? _len4 - 3 : 0), _key4 = 3; _key4 < _len4; _key4++) {
-        args[_key4 - 3] = arguments[_key4];
+      for (var _len4 = arguments.length, args = Array(_len4 > 4 ? _len4 - 4 : 0), _key4 = 4; _key4 < _len4; _key4++) {
+        args[_key4 - 4] = arguments[_key4];
       }
 
       switch (args.length) {
@@ -478,7 +490,7 @@ var HelpersAndParsers = (function () {
             // class    - someAction(source)      (if mapping present)
             // class    - someAction(queryParams) (without mapping)
             if (isClassMethod) {
-              if (HelpersAndParsers.isMappingsPresentInUrl(promiseConfig.url)) {
+              if (actionConfig.isArray == false) {
                 promiseConfig.source = args[0];
               } else {
                 promiseConfig.queryParams = args[0];
@@ -503,18 +515,18 @@ var HelpersAndParsers = (function () {
     // Parse action url and replace mappings with source values
   }, {
     key: 'parseUrlWithMapping',
-    value: function parseUrlWithMapping(url, mappings, source) {
-      var outputUrl = _lodash2['default'].clone(url);
+    value: function parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig) {
+      var outputUrl = _lodash2['default'].clone(actionConfig.url);
       // Loop mappings, collect values from source, replace in url if exists
-      for (var object_key in mappings) {
-        var sourceValue = source[object_key];
+      for (var object_key in resourceConfig.mappings) {
+        var sourceValue = promiseConfig.source[object_key];
         // Replace mapping key by source value if exists source value
         if (sourceValue) {
-          outputUrl = outputUrl.replace(new RegExp('{' + mappings[object_key] + '}', 'g'), sourceValue);
+          outputUrl = outputUrl.replace(new RegExp('{' + resourceConfig.mappings[object_key] + '}', 'g'), sourceValue);
         }
         // Delete mapping key from url
         else {
-            outputUrl = outputUrl.replace(new RegExp('/?{' + mappings[object_key] + '}', 'g'), "");
+            outputUrl = outputUrl.replace(new RegExp('/?{' + resourceConfig.mappings[object_key] + '}', 'g'), "");
           }
       }
       // Clear URL from unmatched mappings
@@ -552,14 +564,6 @@ var HelpersAndParsers = (function () {
       }
       return targetObject;
     }
-  }, {
-    key: 'isMappingsPresentInUrl',
-    value: function isMappingsPresentInUrl() {
-      var inputUrl = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
-
-      var regex = /\/?\{\:.+\}/gi;
-      return !!regex.exec(inputUrl);
-    }
 
     // Extract QueryParams from URL
   }, {
@@ -596,11 +600,11 @@ var HelpersAndParsers = (function () {
 })();
 
 var DEFAULT_ACTIONS_CONFIG = {
-  'query': { url: null, params: {}, method: 'GET' },
-  'get': { url: null, params: {}, method: 'GET' },
-  'create': { url: null, params: {}, method: 'POST' },
-  'update': { url: null, params: {}, method: 'PUT' },
-  'delete': { url: null, params: {}, method: 'DELETE' }
+  'query': { url: null, params: {}, method: 'GET', isArray: true },
+  'get': { url: null, params: {}, method: 'GET', isArray: false },
+  'create': { url: null, params: {}, method: 'POST', isArray: false },
+  'update': { url: null, params: {}, method: 'PUT', isArray: false },
+  'delete': { url: null, params: {}, method: 'DELETE', isArray: false }
 };
 var ACTIONS_WITH_BODY = ['POST', 'PUT', 'PATCH', 'DELETE'];
 var ACTIONS_WITHOUT_BODY = ['GET'];
