@@ -112,7 +112,7 @@ var ActionsBuilder = (function () {
         newRequest.set('Accept', 'application/json');
 
         // queryParams
-        newRequest.query(_lodash2['default'].merge(actionConfig.params, promiseConfig.queryParams));
+        newRequest.query(_lodash2['default'].merge(_lodash2['default'].cloneDeep(actionConfig.params), promiseConfig.queryParams));
 
         // bodyData
         if (!_lodash2['default'].isEmpty(promiseConfig.bodyData) && ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {

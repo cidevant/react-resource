@@ -77,7 +77,7 @@ class ActionsBuilder {
       newRequest.set('Accept', 'application/json');
 
       // queryParams
-      newRequest.query(_.merge(actionConfig.params, promiseConfig.queryParams));
+      newRequest.query(_.merge(_.cloneDeep(actionConfig.params), promiseConfig.queryParams));
 
       // bodyData
       if(!_.isEmpty(promiseConfig.bodyData) &&
