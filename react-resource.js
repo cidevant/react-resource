@@ -24,6 +24,16 @@ export default function ReactResource(url, mappings, actionsConfig) {
   return Resource;
 }
 
+// Interceptors container and setter
+ReactResource.interceptors = [];
+ReactResource.add_interceptor = (interceptorObj) => {
+  if(typeof interceptorObj == 'object' &&
+     (typeof interceptorObj.response == 'function' ||
+     typeof interceptorObj.rejection == 'function')) {
+    ReactResource.interceptors.push(interceptorObj);
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Builds Class and Instance actions on provided Resource
 
@@ -88,11 +98,23 @@ class ActionsBuilder {
       // Send
       newRequest.end(function(err, res){
         if(err === null) {
+
+          // Process interceptors - response functions
+          _.forEach(ReactResource.interceptors, (interceptor) => {
+            if(typeof interceptor.response == 'function') interceptor.response(res);
+          })
+
           resolvePromiseFn(res && res.body);
           if(promiseConfig.resolveFn && (typeof promiseConfig.resolveFn == 'function')){
             promiseConfig.resolveFn(res && res.body);
           }
         } else {
+
+          // Process interceptors - rejection functions
+          _.forEach(ReactResource.interceptors, (interceptor) => {
+            if(typeof interceptor.rejection == 'function') interceptor.rejection(err, res);
+          })
+
           rejectPromiseFn((res && res.body) || err);
           if(promiseConfig.rejectFn && (typeof promiseConfig.rejectFn == 'function')){
             promiseConfig.rejectFn((res && res.body) || err);
@@ -480,11 +502,10 @@ class HelpersAndParsers {
 
   // Make array unique
   static uniqueArray(array = []) {
-    var a = array.concat();
-    for(var i=0; i<a.length; ++i) {
-       for(var j=i+1; j<a.length; ++j) {
-           if(a[i] === a[j])
-               a.splice(j--, 1);
+    let a = array.concat();
+    for(let i=0; i<a.length; ++i) {
+       for(let j=i+1; j<a.length; ++j) {
+          if(a[i] === a[j]) a.splice(j--, 1);
        }
     }
     return a;

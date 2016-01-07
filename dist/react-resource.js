@@ -46,6 +46,14 @@ function ReactResource(url, mappings, actionsConfig) {
   return Resource;
 }
 
+// Interceptors container and setter
+ReactResource.interceptors = [];
+ReactResource.add_interceptor = function (interceptorObj) {
+  if (typeof interceptorObj == 'object' && (typeof interceptorObj.response == 'function' || typeof interceptorObj.rejection == 'function')) {
+    ReactResource.interceptors.push(interceptorObj);
+  }
+};
+
 // -----------------------------------------------------------------------------
 // Builds Class and Instance actions on provided Resource
 
@@ -122,11 +130,23 @@ var ActionsBuilder = (function () {
         // Send
         newRequest.end(function (err, res) {
           if (err === null) {
+
+            // Process interceptors - response functions
+            _lodash2['default'].forEach(ReactResource.interceptors, function (interceptor) {
+              if (typeof interceptor.response == 'function') interceptor.response(res);
+            });
+
             resolvePromiseFn(res && res.body);
             if (promiseConfig.resolveFn && typeof promiseConfig.resolveFn == 'function') {
               promiseConfig.resolveFn(res && res.body);
             }
           } else {
+
+            // Process interceptors - rejection functions
+            _lodash2['default'].forEach(ReactResource.interceptors, function (interceptor) {
+              if (typeof interceptor.rejection == 'function') interceptor.rejection(err, res);
+            });
+
             rejectPromiseFn(res && res.body || err);
             if (promiseConfig.rejectFn && typeof promiseConfig.rejectFn == 'function') {
               promiseConfig.rejectFn(res && res.body || err);

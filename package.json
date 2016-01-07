@@ -1,6 +1,6 @@
 {
   "name": "react-resource",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Component for building/creating restful api requests",
   "scripts": {
     "build": "babel ./react-resource.js -o dist/react-resource.js",
