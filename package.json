@@ -27,7 +27,6 @@
   "homepage": "https://github.com/cidevant/react-resource#readme",
   "dependencies": {
     "lodash": "^4.17.4",
-    "promise": "^7.0.4",
     "superagent": "^1.4.0"
   },
   "devDependencies": {

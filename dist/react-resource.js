@@ -19,10 +19,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var _promise = require('promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _superagent = require('superagent');
 
 var _superagent2 = _interopRequireDefault(_superagent);
@@ -125,7 +121,7 @@ var ActionsBuilder = (function () {
     key: 'buildPromiseFromAction',
     value: function buildPromiseFromAction(actionName, resourceConfig, promiseConfig) {
       var actionConfig = resourceConfig.actionsConfig[actionName];
-      return new _promise2['default'](function (resolvePromiseFn, rejectPromiseFn) {
+      return new Promise(function (resolvePromiseFn, rejectPromiseFn) {
         var newRequest = _superagent2['default'],
             actionMethod = actionConfig.method.toUpperCase();
         // Create

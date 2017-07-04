@@ -5,7 +5,6 @@
    Written to symbiose with RefluxJs async actions.
    ========================================================================== */
 
-import Promise      from 'promise';
 import request      from 'superagent';
 import each         from 'lodash/each'
 import merge        from 'lodash/merge'
