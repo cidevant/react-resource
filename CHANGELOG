@@ -1,2 +1,7 @@
+### 1.0.9
+
+* Prevent import of the whole lodash library
+
 ### 1.0.8
+
 * Added ```Interceptors```
