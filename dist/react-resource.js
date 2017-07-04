@@ -31,6 +31,14 @@ var _lodashEach = require('lodash/each');
 
 var _lodashEach2 = _interopRequireDefault(_lodashEach);
 
+var _lodashMerge = require('lodash/merge');
+
+var _lodashMerge2 = _interopRequireDefault(_lodashMerge);
+
+var _lodashClone = require('lodash/clone');
+
+var _lodashClone2 = _interopRequireDefault(_lodashClone);
+
 var _lodashCloneDeep = require('lodash/cloneDeep');
 
 var _lodashCloneDeep2 = _interopRequireDefault(_lodashCloneDeep);
@@ -140,7 +148,7 @@ var ActionsBuilder = (function () {
         newRequest.set('Accept', 'application/json');
 
         // queryParams
-        newRequest.query(merge((0, _lodashCloneDeep2['default'])(actionConfig.params), promiseConfig.queryParams));
+        newRequest.query((0, _lodashMerge2['default'])((0, _lodashCloneDeep2['default'])(actionConfig.params), promiseConfig.queryParams));
 
         // bodyData
         if (!(0, _lodashIsEmpty2['default'])(promiseConfig.bodyData) && ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
@@ -556,7 +564,7 @@ var HelpersAndParsers = (function () {
   }, {
     key: 'parseUrlWithMapping',
     value: function parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig) {
-      var outputUrl = clone(actionConfig.url);
+      var outputUrl = (0, _lodashClone2['default'])(actionConfig.url);
       // Loop mappings, collect values from source, replace in url if exists
       for (var object_key in resourceConfig.mappings) {
         var sourceValue = promiseConfig.source[object_key];
