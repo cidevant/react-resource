@@ -7,7 +7,12 @@
 
 import Promise      from 'promise';
 import request      from 'superagent';
-import _            from 'lodash';
+import each         from 'lodash/each'
+import cloneDeep    from 'lodash/cloneDeep'
+import isEmpty      from 'lodash/isEmpty'
+import isNull       from 'lodash/isNull'
+import isUndefined  from 'lodash/isUndefined'
+import startsWith   from 'lodash/startsWith'
 
 // ------------------------------------------------------------------------------
 // Resource class creator
@@ -39,13 +44,13 @@ ReactResource.add_interceptor = (interceptorObj) => {
 
 class ActionsBuilder {
   static createClassActions(resourceConfig, resourceClass){
-    _.forEach(Object.keys(resourceConfig.actionsConfig), (actionName) => {
+    each(Object.keys(resourceConfig.actionsConfig), (actionName) => {
       resourceClass[actionName] = ActionsBuilder.buildActionFromConfig(actionName, resourceConfig, {});
     });
   }
 
   static createInstanceActions(resourceConfig, resourceInstance){
-    _.forEach(Object.keys(resourceConfig.actionsConfig), (actionName) => {
+    each(Object.keys(resourceConfig.actionsConfig), (actionName) => {
       resourceInstance["$" + actionName] = ActionsBuilder.buildActionFromConfig(actionName,
                                                                                 resourceConfig,
                                                                                 resourceInstance);
@@ -87,10 +92,10 @@ class ActionsBuilder {
       newRequest.set('Accept', 'application/json');
 
       // queryParams
-      newRequest.query(_.merge(_.cloneDeep(actionConfig.params), promiseConfig.queryParams));
+      newRequest.query(merge(cloneDeep(actionConfig.params), promiseConfig.queryParams));
 
       // bodyData
-      if(!_.isEmpty(promiseConfig.bodyData) &&
+      if(!isEmpty(promiseConfig.bodyData) &&
          ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
         newRequest.send(promiseConfig.bodyData);
       }
@@ -100,7 +105,7 @@ class ActionsBuilder {
         if(err === null) {
 
           // Process interceptors - response functions
-          _.forEach(ReactResource.interceptors, (interceptor) => {
+          each(ReactResource.interceptors, (interceptor) => {
             if(typeof interceptor.response == 'function') interceptor.response(res);
           })
 
@@ -111,7 +116,7 @@ class ActionsBuilder {
         } else {
 
           // Process interceptors - rejection functions
-          _.forEach(ReactResource.interceptors, (interceptor) => {
+          each(ReactResource.interceptors, (interceptor) => {
             if(typeof interceptor.rejection == 'function') interceptor.rejection(err, res);
           })
 
@@ -134,7 +139,7 @@ class ResourceConfig {
     this.url                    = url;
     this.mappings               = mappings;
     this.extraActionsConfig     = extraActionsConfig;
-    this.defaultActionsConfig   = _.cloneDeep(DEFAULT_ACTIONS_CONFIG);
+    this.defaultActionsConfig   = cloneDeep(DEFAULT_ACTIONS_CONFIG);
     this.actionsConfig          = {};
     this.buildActionsConfig();
   }
@@ -143,14 +148,14 @@ class ResourceConfig {
   buildActionsConfig(){
     let mergedConfigKeys         = HelpersAndParsers.uniqueArray(Object.keys(this.defaultActionsConfig)
                                                                        .concat(Object.keys(this.extraActionsConfig)));
-    _.forEach(mergedConfigKeys, (actionName) => {
+    each(mergedConfigKeys, (actionName) => {
       let defaultActionConfig    = this.defaultActionsConfig[actionName],
           extraActionConfig      = this.extraActionsConfig[actionName];
       // Copy config from template (default actions config)
       if(defaultActionConfig) this.actionsConfig[actionName] = defaultActionConfig;
       // Override config attributes by user defined config
       if(extraActionConfig) {
-        _.forEach(Object.keys(extraActionConfig), (extraActionConfigKey) => {
+        each(Object.keys(extraActionConfig), (extraActionConfigKey) => {
           if(!this.actionsConfig[actionName]) this.actionsConfig[actionName] = {};
           this.actionsConfig[actionName][extraActionConfigKey] = extraActionConfig[extraActionConfigKey];
         });
@@ -162,16 +167,16 @@ class ResourceConfig {
 
   checkActionConfig(actionName) {
     let actionConfig = this.actionsConfig[actionName];
-    if(_.isEmpty(actionConfig.url)) {
+    if(isEmpty(actionConfig.url)) {
       this.actionsConfig[actionName].url = this.url;
     }
-    if(_.isEmpty(actionConfig.params)) {
+    if(isEmpty(actionConfig.params)) {
       this.actionsConfig[actionName].params = HelpersAndParsers.extractQueryParams(this.actionsConfig[actionName].url);
     }
-    if(_.isEmpty(actionConfig.method)) {
+    if(isEmpty(actionConfig.method)) {
       this.actionsConfig[actionName].method = 'GET';
     }
-    if(_.isNull(actionConfig.isArray) || _.isUndefined(actionConfig.isArray)) {
+    if(isNull(actionConfig.isArray) || isUndefined(actionConfig.isArray)) {
       this.actionsConfig[actionName].isArray = false;
     }
   }
@@ -183,7 +188,7 @@ class ResourceConfig {
 class HelpersAndParsers {
   // Parse action arguments
   static parseArgs(actionName, resourceConfig, ModelInstance = {}, ...args){
-    let promiseConfig = _.cloneDeep(HelpersAndParsers.getDefaultPromiseConfig()),
+    let promiseConfig = cloneDeep(HelpersAndParsers.getDefaultPromiseConfig()),
         actionConfig  = resourceConfig.actionsConfig &&
                         resourceConfig.actionsConfig[actionName],
         actionMethod  = actionConfig && actionConfig.method.toUpperCase();
@@ -192,7 +197,7 @@ class HelpersAndParsers {
     if(ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
       HelpersAndParsers.WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args);
 
-      if(!_.isEmpty(promiseConfig.source) && _.isEmpty(promiseConfig.bodyData)) {
+      if(!isEmpty(promiseConfig.source) && isEmpty(promiseConfig.bodyData)) {
         HelpersAndParsers.copyPureAttributes(promiseConfig.source, promiseConfig.bodyData);
       }
     } else
@@ -211,7 +216,7 @@ class HelpersAndParsers {
   // Parser for methods WITH BodyContent
   // const ACTIONS_WITH_BODY
   static WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args) {
-    let isClassMethod = _.isEmpty(ModelInstance);
+    let isClassMethod = isEmpty(ModelInstance);
     // instance method - should insert INSTANCE in source
     if(!isClassMethod) { promiseConfig.source = ModelInstance; }
     switch(args.length){
@@ -349,7 +354,7 @@ class HelpersAndParsers {
   // Parser for methods WITHOUT BodyContent
   // const ACTIONS_WITHOUT_BODY
   static NoBodyData(actionName, resourceConfig, promiseConfig, ModelInstance, ...args) {
-    let isClassMethod = _.isEmpty(ModelInstance),
+    let isClassMethod = isEmpty(ModelInstance),
         actionConfig  = resourceConfig.actionsConfig[actionName];
 
     // instance method - should insert INSTANCE in source
@@ -448,7 +453,7 @@ class HelpersAndParsers {
 
   // Parse action url and replace mappings with source values
   static parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig) {
-    let outputUrl = _.clone(actionConfig.url);
+    let outputUrl = clone(actionConfig.url);
     // Loop mappings, collect values from source, replace in url if exists
     for(var object_key in resourceConfig.mappings) {
       let sourceValue = promiseConfig.source[object_key];
@@ -480,8 +485,8 @@ class HelpersAndParsers {
   // Dont copy attributes prefixed with `$` (ex: $create)
   static copyPureAttributes(sourceObject, targetObject = {}) {
     if(typeof sourceObject == 'object') {
-      _.forEach(Object.keys(sourceObject), sourceAttribute => {
-        if(_.startsWith(sourceAttribute, '$') == false) {
+      each(Object.keys(sourceObject), sourceAttribute => {
+        if(startsWith(sourceAttribute, '$') == false) {
           targetObject[sourceAttribute] = sourceObject[sourceAttribute];
         }
       });

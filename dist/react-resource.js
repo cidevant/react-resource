@@ -27,9 +27,29 @@ var _superagent = require('superagent');
 
 var _superagent2 = _interopRequireDefault(_superagent);
 
-var _lodash = require('lodash');
+var _lodashEach = require('lodash/each');
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _lodashEach2 = _interopRequireDefault(_lodashEach);
+
+var _lodashCloneDeep = require('lodash/cloneDeep');
+
+var _lodashCloneDeep2 = _interopRequireDefault(_lodashCloneDeep);
+
+var _lodashIsEmpty = require('lodash/isEmpty');
+
+var _lodashIsEmpty2 = _interopRequireDefault(_lodashIsEmpty);
+
+var _lodashIsNull = require('lodash/isNull');
+
+var _lodashIsNull2 = _interopRequireDefault(_lodashIsNull);
+
+var _lodashIsUndefined = require('lodash/isUndefined');
+
+var _lodashIsUndefined2 = _interopRequireDefault(_lodashIsUndefined);
+
+var _lodashStartsWith = require('lodash/startsWith');
+
+var _lodashStartsWith2 = _interopRequireDefault(_lodashStartsWith);
 
 // ------------------------------------------------------------------------------
 // Resource class creator
@@ -68,14 +88,14 @@ var ActionsBuilder = (function () {
   _createClass(ActionsBuilder, null, [{
     key: 'createClassActions',
     value: function createClassActions(resourceConfig, resourceClass) {
-      _lodash2['default'].forEach(Object.keys(resourceConfig.actionsConfig), function (actionName) {
+      (0, _lodashEach2['default'])(Object.keys(resourceConfig.actionsConfig), function (actionName) {
         resourceClass[actionName] = ActionsBuilder.buildActionFromConfig(actionName, resourceConfig, {});
       });
     }
   }, {
     key: 'createInstanceActions',
     value: function createInstanceActions(resourceConfig, resourceInstance) {
-      _lodash2['default'].forEach(Object.keys(resourceConfig.actionsConfig), function (actionName) {
+      (0, _lodashEach2['default'])(Object.keys(resourceConfig.actionsConfig), function (actionName) {
         resourceInstance["$" + actionName] = ActionsBuilder.buildActionFromConfig(actionName, resourceConfig, resourceInstance);
       });
     }
@@ -120,10 +140,10 @@ var ActionsBuilder = (function () {
         newRequest.set('Accept', 'application/json');
 
         // queryParams
-        newRequest.query(_lodash2['default'].merge(_lodash2['default'].cloneDeep(actionConfig.params), promiseConfig.queryParams));
+        newRequest.query(merge((0, _lodashCloneDeep2['default'])(actionConfig.params), promiseConfig.queryParams));
 
         // bodyData
-        if (!_lodash2['default'].isEmpty(promiseConfig.bodyData) && ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
+        if (!(0, _lodashIsEmpty2['default'])(promiseConfig.bodyData) && ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
           newRequest.send(promiseConfig.bodyData);
         }
 
@@ -132,7 +152,7 @@ var ActionsBuilder = (function () {
           if (err === null) {
 
             // Process interceptors - response functions
-            _lodash2['default'].forEach(ReactResource.interceptors, function (interceptor) {
+            (0, _lodashEach2['default'])(ReactResource.interceptors, function (interceptor) {
               if (typeof interceptor.response == 'function') interceptor.response(res);
             });
 
@@ -143,7 +163,7 @@ var ActionsBuilder = (function () {
           } else {
 
             // Process interceptors - rejection functions
-            _lodash2['default'].forEach(ReactResource.interceptors, function (interceptor) {
+            (0, _lodashEach2['default'])(ReactResource.interceptors, function (interceptor) {
               if (typeof interceptor.rejection == 'function') interceptor.rejection(err, res);
             });
 
@@ -171,7 +191,7 @@ var ResourceConfig = (function () {
     this.url = url;
     this.mappings = mappings;
     this.extraActionsConfig = extraActionsConfig;
-    this.defaultActionsConfig = _lodash2['default'].cloneDeep(DEFAULT_ACTIONS_CONFIG);
+    this.defaultActionsConfig = (0, _lodashCloneDeep2['default'])(DEFAULT_ACTIONS_CONFIG);
     this.actionsConfig = {};
     this.buildActionsConfig();
   }
@@ -187,14 +207,14 @@ var ResourceConfig = (function () {
       var _this = this;
 
       var mergedConfigKeys = HelpersAndParsers.uniqueArray(Object.keys(this.defaultActionsConfig).concat(Object.keys(this.extraActionsConfig)));
-      _lodash2['default'].forEach(mergedConfigKeys, function (actionName) {
+      (0, _lodashEach2['default'])(mergedConfigKeys, function (actionName) {
         var defaultActionConfig = _this.defaultActionsConfig[actionName],
             extraActionConfig = _this.extraActionsConfig[actionName];
         // Copy config from template (default actions config)
         if (defaultActionConfig) _this.actionsConfig[actionName] = defaultActionConfig;
         // Override config attributes by user defined config
         if (extraActionConfig) {
-          _lodash2['default'].forEach(Object.keys(extraActionConfig), function (extraActionConfigKey) {
+          (0, _lodashEach2['default'])(Object.keys(extraActionConfig), function (extraActionConfigKey) {
             if (!_this.actionsConfig[actionName]) _this.actionsConfig[actionName] = {};
             _this.actionsConfig[actionName][extraActionConfigKey] = extraActionConfig[extraActionConfigKey];
           });
@@ -207,16 +227,16 @@ var ResourceConfig = (function () {
     key: 'checkActionConfig',
     value: function checkActionConfig(actionName) {
       var actionConfig = this.actionsConfig[actionName];
-      if (_lodash2['default'].isEmpty(actionConfig.url)) {
+      if ((0, _lodashIsEmpty2['default'])(actionConfig.url)) {
         this.actionsConfig[actionName].url = this.url;
       }
-      if (_lodash2['default'].isEmpty(actionConfig.params)) {
+      if ((0, _lodashIsEmpty2['default'])(actionConfig.params)) {
         this.actionsConfig[actionName].params = HelpersAndParsers.extractQueryParams(this.actionsConfig[actionName].url);
       }
-      if (_lodash2['default'].isEmpty(actionConfig.method)) {
+      if ((0, _lodashIsEmpty2['default'])(actionConfig.method)) {
         this.actionsConfig[actionName].method = 'GET';
       }
-      if (_lodash2['default'].isNull(actionConfig.isArray) || _lodash2['default'].isUndefined(actionConfig.isArray)) {
+      if ((0, _lodashIsNull2['default'])(actionConfig.isArray) || (0, _lodashIsUndefined2['default'])(actionConfig.isArray)) {
         this.actionsConfig[actionName].isArray = false;
       }
     }
@@ -240,7 +260,7 @@ var HelpersAndParsers = (function () {
     value: function parseArgs(actionName, resourceConfig) {
       var ModelInstance = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      var promiseConfig = _lodash2['default'].cloneDeep(HelpersAndParsers.getDefaultPromiseConfig()),
+      var promiseConfig = (0, _lodashCloneDeep2['default'])(HelpersAndParsers.getDefaultPromiseConfig()),
           actionConfig = resourceConfig.actionsConfig && resourceConfig.actionsConfig[actionName],
           actionMethod = actionConfig && actionConfig.method.toUpperCase();
 
@@ -253,7 +273,7 @@ var HelpersAndParsers = (function () {
       if (ACTIONS_WITH_BODY.indexOf(actionMethod) > -1) {
         HelpersAndParsers.WithBodyData.apply(HelpersAndParsers, [actionName, resourceConfig, promiseConfig, ModelInstance].concat(args));
 
-        if (!_lodash2['default'].isEmpty(promiseConfig.source) && _lodash2['default'].isEmpty(promiseConfig.bodyData)) {
+        if (!(0, _lodashIsEmpty2['default'])(promiseConfig.source) && (0, _lodashIsEmpty2['default'])(promiseConfig.bodyData)) {
           HelpersAndParsers.copyPureAttributes(promiseConfig.source, promiseConfig.bodyData);
         }
       } else
@@ -274,7 +294,7 @@ var HelpersAndParsers = (function () {
   }, {
     key: 'WithBodyData',
     value: function WithBodyData(actionName, resourceConfig, promiseConfig, ModelInstance) {
-      var isClassMethod = _lodash2['default'].isEmpty(ModelInstance);
+      var isClassMethod = (0, _lodashIsEmpty2['default'])(ModelInstance);
       // instance method - should insert INSTANCE in source
       if (!isClassMethod) {
         promiseConfig.source = ModelInstance;
@@ -423,7 +443,7 @@ var HelpersAndParsers = (function () {
   }, {
     key: 'NoBodyData',
     value: function NoBodyData(actionName, resourceConfig, promiseConfig, ModelInstance) {
-      var isClassMethod = _lodash2['default'].isEmpty(ModelInstance),
+      var isClassMethod = (0, _lodashIsEmpty2['default'])(ModelInstance),
           actionConfig = resourceConfig.actionsConfig[actionName];
 
       // instance method - should insert INSTANCE in source
@@ -536,7 +556,7 @@ var HelpersAndParsers = (function () {
   }, {
     key: 'parseUrlWithMapping',
     value: function parseUrlWithMapping(actionConfig, resourceConfig, promiseConfig) {
-      var outputUrl = _lodash2['default'].clone(actionConfig.url);
+      var outputUrl = clone(actionConfig.url);
       // Loop mappings, collect values from source, replace in url if exists
       for (var object_key in resourceConfig.mappings) {
         var sourceValue = promiseConfig.source[object_key];
@@ -576,8 +596,8 @@ var HelpersAndParsers = (function () {
       var targetObject = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       if (typeof sourceObject == 'object') {
-        _lodash2['default'].forEach(Object.keys(sourceObject), function (sourceAttribute) {
-          if (_lodash2['default'].startsWith(sourceAttribute, '$') == false) {
+        (0, _lodashEach2['default'])(Object.keys(sourceObject), function (sourceAttribute) {
+          if ((0, _lodashStartsWith2['default'])(sourceAttribute, '$') == false) {
             targetObject[sourceAttribute] = sourceObject[sourceAttribute];
           }
         });
