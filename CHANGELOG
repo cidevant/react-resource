@@ -1,9 +1,10 @@
 ### 2.0.0
 
-* Rewrited code
-* Exposed global `whatwg-fetch` config
+* Rewrited 100% of code
+* Exposed global `whatwg-fetch` config (`fetchOptions`)
 * Send files
-* Instantiate action response
+* Make instances from action response data
+* Webpack dev server
 
 ### 1.0.9
 
