@@ -1,3 +1,10 @@
+### 2.0.0
+
+* Rewrited code
+* Exposed global `whatwg-fetch` config
+* Send files
+* Instantiate action response
+
 ### 1.0.9
 
 * Prevent import of the whole lodash library
