@@ -1482,7 +1482,7 @@ function ReactResource() {
     return this;
   };
 
-  // ResourceModel interceptors
+  // Model interceptors
   ReactResourceModel.interceptors = [];
 
   // Class actions
@@ -1491,6 +1491,7 @@ function ReactResource() {
   return ReactResourceModel;
 }
 
+// Global interceptors
 ReactResource.interceptors = [];
 
 if ((typeof window === 'undefined' ? 'undefined' : _typeof(window)) !== undefined) {
@@ -7020,10 +7021,6 @@ var _map = __webpack_require__(60);
 
 var _map2 = _interopRequireDefault(_map);
 
-var _each = __webpack_require__(10);
-
-var _each2 = _interopRequireDefault(_each);
-
 var _promise = __webpack_require__(179);
 
 var _promise2 = _interopRequireDefault(_promise);
@@ -7038,9 +7035,9 @@ var _argumentsParser2 = _interopRequireDefault(_argumentsParser);
 
 var _urlParser = __webpack_require__(191);
 
-var _index = __webpack_require__(36);
+var _Interceptors = __webpack_require__(192);
 
-var _index2 = _interopRequireDefault(_index);
+var _Interceptors2 = _interopRequireDefault(_Interceptors);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7055,6 +7052,7 @@ var Action = function () {
     this.config = config;
     this.data = data; // for url and request body
     this.mappings = mappings; // for url
+    this.interceptors = new _Interceptors2.default(Model); // request & response interceptors
   }
 
   /**
@@ -7075,7 +7073,7 @@ var Action = function () {
         kwargs[_key] = arguments[_key];
       }
 
-      var configPromise = new _promise2.default(function (resolve, reject) {
+      return new _promise2.default(function (resolve, reject) {
         // Transform request data
         var data = (0, _isFunction2.default)(_this.config.transformRequest) ? _this.config.transformRequest(_this.data) : _this.data;
 
@@ -7100,9 +7098,6 @@ var Action = function () {
 
         resolve(config);
       });
-
-      // Request interceptors
-      return this.requestInterceptors(configPromise);
     }
 
     /**
@@ -7118,7 +7113,8 @@ var Action = function () {
     value: function promise() {
       var _this2 = this;
 
-      return this.configure.apply(this, arguments).then(function (_ref) {
+      // Request interceptors
+      return this.interceptors.request(this.configure.apply(this, arguments)).then(function (_ref) {
         var url = _ref.url,
             options = _ref.options,
             resolveFn = _ref.resolveFn,
@@ -7127,7 +7123,7 @@ var Action = function () {
         var promise = (0, _request2.default)(url, options);
 
         // Response interceptors
-        promise = _this2.responseInterceptors(promise);
+        promise = _this2.interceptors.response(promise);
 
         // Make instance/instances from request response
         promise = _this2.tryInstantiate(promise);
@@ -7171,59 +7167,6 @@ var Action = function () {
 
         return data;
       });
-    }
-
-    /* 
-     * Interceptors
-     * =============================================================================
-     * 
-     * There are two kinds of interceptors (and two kinds of rejection interceptors):
-     *
-     *   * `request`: interceptors get called with a http `config` object. The function is free to
-     *     modify the `config` object or create a new one. The function needs to return the `config`
-     *     object directly, or a promise containing the `config` or a new `config` object.
-     *   * `requestError`: interceptor gets called when a previous interceptor threw an error or
-     *     resolved with a rejection.
-     *   * `response`: interceptors get called with http `response` object. The function is free to
-     *     modify the `response` object or create a new one. The function needs to return the `response`
-     *     object directly, or as a promise containing the `response` or a new `response` object.
-     *   * `responseError`: interceptor gets called when a previous interceptor threw an error or
-     *     resolved with a rejection.
-     */
-
-  }, {
-    key: 'requestInterceptors',
-    value: function requestInterceptors(config) {
-      // Resource
-      (0, _each2.default)(_index2.default.interceptors, function (i) {
-        if (i.request) config = config.then(i.request);
-        if (i.requestError) config = config.catch(i.requestError);
-      });
-
-      // Model
-      (0, _each2.default)(this.Model.interceptors, function (i) {
-        if (i.request) config = config.then(i.request);
-        if (i.requestError) config = config.catch(i.requestError);
-      });
-
-      return config;
-    }
-  }, {
-    key: 'responseInterceptors',
-    value: function responseInterceptors(promise) {
-      // Resource
-      (0, _each2.default)(_index2.default.interceptors, function (i) {
-        if (i.response) promise = promise.then(i.response);
-        if (i.responseError) promise = promise.catch(i.responseError);
-      });
-
-      // Model
-      (0, _each2.default)(this.Model.interceptors, function (i) {
-        if (i.response) promise = promise.then(i.response);
-        if (i.responseError) promise = promise.catch(i.responseError);
-      });
-
-      return promise;
     }
   }]);
 
@@ -8340,6 +8283,95 @@ function serialize(obj, prefix) {
 
   return str.join("&");
 }
+
+/***/ }),
+/* 192 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Interceptors
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * =============================================================================
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * There are two kinds of interceptors (and two kinds of rejection interceptors):
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *   * `request`: interceptors get called with a http `config` object. The function is free to
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     modify the `config` object or create a new one. The function needs to return the `config`
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     object directly, or a promise containing the `config` or a new `config` object.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *   * `requestError`: interceptor gets called when a previous interceptor threw an error or
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     resolved with a rejection.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *   * `response`: interceptors get called with http `response` object. The function is free to
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     modify the `response` object or create a new one. The function needs to return the `response`
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     object directly, or as a promise containing the `response` or a new `response` object.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *   * `responseError`: interceptor gets called when a previous interceptor threw an error or
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     resolved with a rejection.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+var _index = __webpack_require__(36);
+
+var _index2 = _interopRequireDefault(_index);
+
+var _each = __webpack_require__(10);
+
+var _each2 = _interopRequireDefault(_each);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Interceptors = function () {
+  function Interceptors(Model) {
+    _classCallCheck(this, Interceptors);
+
+    this.Model = Model;
+  }
+
+  _createClass(Interceptors, [{
+    key: 'request',
+    value: function request(config) {
+      // Resource
+      (0, _each2.default)(_index2.default.interceptors, function (i) {
+        if (i.request) config = config.then(i.request);
+        if (i.requestError) config = config.catch(i.requestError);
+      });
+
+      // Model
+      (0, _each2.default)(this.Model.interceptors, function (i) {
+        if (i.request) config = config.then(i.request);
+        if (i.requestError) config = config.catch(i.requestError);
+      });
+
+      return config;
+    }
+  }, {
+    key: 'response',
+    value: function response(promise) {
+      // Resource
+      (0, _each2.default)(_index2.default.interceptors, function (i) {
+        if (i.response) promise = promise.then(i.response);
+        if (i.responseError) promise = promise.catch(i.responseError);
+      });
+
+      // Model
+      (0, _each2.default)(this.Model.interceptors, function (i) {
+        if (i.response) promise = promise.then(i.response);
+        if (i.responseError) promise = promise.catch(i.responseError);
+      });
+
+      return promise;
+    }
+  }]);
+
+  return Interceptors;
+}();
+
+exports.default = Interceptors;
 
 /***/ })
 /******/ ]);

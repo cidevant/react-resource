@@ -26,7 +26,7 @@ export default function ReactResource(...kwargs) {
     return this;
   };
 
-  // ResourceModel interceptors
+  // Model interceptors
   ReactResourceModel.interceptors = [];
 
   // Class actions
@@ -35,6 +35,7 @@ export default function ReactResource(...kwargs) {
   return ReactResourceModel;
 }
 
+// Global interceptors
 ReactResource.interceptors = [];
 
 if (typeof window !== undefined) {

@@ -8,12 +8,11 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import includes from 'lodash/includes';
 import map from 'lodash/map';
-import each from 'lodash/each';
 import Promise from 'promise';
 import request from './utils/request';
 import argumentsParser from './utils/arguments-parser';
 import { parseUrl, parseUrlQuery, getPathFromUrl } from './utils/url-parser';
-import ReactResource from './index';
+import Interceptors from './Interceptors';
 
 export default class Action {
   static httpMethodsWithBody = ['post', 'put', 'patch', 'delete'];
@@ -24,6 +23,7 @@ export default class Action {
     this.config = config;
     this.data = data; // for url and request body
     this.mappings = mappings; // for url
+    this.interceptors = new Interceptors(Model); // request & response interceptors
   }
 
   /**
@@ -36,7 +36,7 @@ export default class Action {
    */
 
   configure(...kwargs) {
-    const configPromise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // Transform request data
       const data = isFunction(this.config.transformRequest)
         ? this.config.transformRequest(this.data)
@@ -63,9 +63,6 @@ export default class Action {
 
       resolve(config);
     });
-
-    // Request interceptors
-    return this.requestInterceptors(configPromise);
   }
 
   /**
@@ -77,12 +74,13 @@ export default class Action {
    */
 
   promise(...kwargs) {
-    return this.configure(...kwargs)
+    // Request interceptors
+    return this.interceptors.request(this.configure(...kwargs))
       .then(({ url, options, resolveFn, rejectionFn }) => {
         let promise = request(url, options);
         
         // Response interceptors
-        promise = this.responseInterceptors(promise);
+        promise = this.interceptors.response(promise);
 
         // Make instance/instances from request response
         promise = this.tryInstantiate(promise);
@@ -120,55 +118,5 @@ export default class Action {
       
       return data;
     });
-  }
-
-/* 
- * Interceptors
- * =============================================================================
- * 
- * There are two kinds of interceptors (and two kinds of rejection interceptors):
- *
- *   * `request`: interceptors get called with a http `config` object. The function is free to
- *     modify the `config` object or create a new one. The function needs to return the `config`
- *     object directly, or a promise containing the `config` or a new `config` object.
- *   * `requestError`: interceptor gets called when a previous interceptor threw an error or
- *     resolved with a rejection.
- *   * `response`: interceptors get called with http `response` object. The function is free to
- *     modify the `response` object or create a new one. The function needs to return the `response`
- *     object directly, or as a promise containing the `response` or a new `response` object.
- *   * `responseError`: interceptor gets called when a previous interceptor threw an error or
- *     resolved with a rejection.
- */
-
-  requestInterceptors(config) {
-    // Resource
-    each(ReactResource.interceptors, (i) => {
-      if (i.request) config = config.then(i.request);
-      if (i.requestError) config = config.catch(i.requestError);
-    });
-
-    // Model
-    each(this.Model.interceptors, (i) => {
-      if (i.request) config = config.then(i.request);
-      if (i.requestError) config = config.catch(i.requestError);
-    });
-
-    return config;
-  }
-
-  responseInterceptors(promise) {
-    // Resource
-    each(ReactResource.interceptors, (i) => {
-      if (i.response) promise = promise.then(i.response);
-      if (i.responseError) promise = promise.catch(i.responseError);
-    });
-    
-    // Model
-    each(this.Model.interceptors, (i) => {
-      if (i.response) promise = promise.then(i.response);
-      if (i.responseError) promise = promise.catch(i.responseError);
-    });
-
-    return promise;
   }
 }
