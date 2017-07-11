@@ -30,7 +30,6 @@ export default function ReactResource(...kwargs) {
   ReactResourceModel.interceptors = [];
 
   // Class actions
-
   actionsBuilder.classMethods(ReactResourceModel);
 
   return ReactResourceModel;
