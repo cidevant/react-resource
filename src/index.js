@@ -8,10 +8,11 @@ import { defaults } from './utils/request';
 import ActionsBuilder from './ActionsBuilder';
 // import test from './test';
 
+// Expose global 'whatwg-fetch' options
 export const fetchOptions = defaults;
 
-export default function ReactResource(url, mappings = {}, customActions = {}) {
-  const actionsBuilder = new ActionsBuilder(url, mappings, customActions);
+export default function ReactResource(...kwargs) {
+  const actionsBuilder = new ActionsBuilder(...kwargs);
 
   function ReactResourceModel(data = {}) {
     // Instantiate data
