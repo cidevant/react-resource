@@ -1,28 +1,27 @@
 import ReactResource from './index';
 
-// ReactResource.interceptors.push({
-//   // Request
-//   request: function (data) {
-//     console.log('ReactResource.interceptors - request', data);
-//     return data;
-//   },
-//   requestError: function (rejection) {
-//     console.log('ReactResource.interceptors - requestError', rejection);
-//     return rejection;
-//   },
-
-//   // Response
-//   response: function(response) {
-//     console.log('ReactResource.interceptors - response', response);
-//     return response;
-//   },
-//   responseError: function (rejection) {
-//     console.log('ReactResource.interceptors - responseError', rejection);
-//     return rejection;
-//   },
-// });
-
 export default function test() {
+  ReactResource.interceptors.push({
+    // Request
+    request: function (data) {
+      console.log('ReactResource.interceptors - request', data);
+      return data;
+    },
+    requestError: function (rejection) {
+      console.log('ReactResource.interceptors - requestError', rejection);
+      return rejection;
+    },
+
+    // Response
+    response: function(response) {
+      console.log('ReactResource.interceptors - response', response);
+      return response;
+    },
+    responseError: function (rejection) {
+      console.log('ReactResource.interceptors - responseError', rejection);
+      return rejection;
+    },
+  });
 
   // Create MODEL
   const User = new ReactResource('/api/enums/?format=json&test={:id}', 

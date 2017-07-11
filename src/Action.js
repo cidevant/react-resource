@@ -13,7 +13,7 @@ import Promise from 'promise';
 import request from './utils/request';
 import argumentsParser from './utils/arguments-parser';
 import { parseUrl, parseUrlQuery, getPathFromUrl } from './utils/url-parser';
-// import ReactResource from './index';
+import ReactResource from './index';
 
 export default class Action {
   static httpMethodsWithBody = ['post', 'put', 'patch', 'delete'];
@@ -141,6 +141,13 @@ export default class Action {
  */
 
   requestInterceptors(config) {
+    // Resource
+    each(ReactResource.interceptors, (i) => {
+      if (i.request) config = config.then(i.request);
+      if (i.requestError) config = config.catch(i.requestError);
+    });
+
+    // Model
     each(this.Model.interceptors, (i) => {
       if (i.request) config = config.then(i.request);
       if (i.requestError) config = config.catch(i.requestError);
@@ -150,6 +157,13 @@ export default class Action {
   }
 
   responseInterceptors(promise) {
+    // Resource
+    each(ReactResource.interceptors, (i) => {
+      if (i.response) promise = promise.then(i.response);
+      if (i.responseError) promise = promise.catch(i.responseError);
+    });
+    
+    // Model
     each(this.Model.interceptors, (i) => {
       if (i.response) promise = promise.then(i.response);
       if (i.responseError) promise = promise.catch(i.responseError);
