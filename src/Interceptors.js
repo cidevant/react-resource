@@ -18,6 +18,7 @@
 
 import ReactResource from './index';
 import each from 'lodash/each';
+import isFunction from 'lodash/isFunction';
 
 export default class Interceptors {
   constructor(Model) {
@@ -27,14 +28,14 @@ export default class Interceptors {
   request(config) {
     // Resource
     each(ReactResource.interceptors, (i) => {
-      if (i.request) config = config.then(i.request);
-      if (i.requestError) config = config.catch(i.requestError);
+      if (isFunction(i.request)) config = config.then(i.request);
+      if (isFunction(i.requestError)) config = config.catch(i.requestError);
     });
 
     // Model
     each(this.Model.interceptors, (i) => {
-      if (i.request) config = config.then(i.request);
-      if (i.requestError) config = config.catch(i.requestError);
+      if (isFunction(i.request)) config = config.then(i.request);
+      if (isFunction(i.requestError)) config = config.catch(i.requestError);
     });
 
     return config;
@@ -43,14 +44,14 @@ export default class Interceptors {
   response(promise) {
     // Resource
     each(ReactResource.interceptors, (i) => {
-      if (i.response) promise = promise.then(i.response);
-      if (i.responseError) promise = promise.catch(i.responseError);
+      if (isFunction(i.response)) promise = promise.then(i.response);
+      if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
     });
 
     // Model
     each(this.Model.interceptors, (i) => {
-      if (i.response) promise = promise.then(i.response);
-      if (i.responseError) promise = promise.catch(i.responseError);
+      if (isFunction(i.response)) promise = promise.then(i.response);
+      if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
     });
 
     return promise;

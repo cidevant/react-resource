@@ -203,7 +203,7 @@ module.exports = isObjectLike;
 "use strict";
 
 
-var isFunction = __webpack_require__(8),
+var isFunction = __webpack_require__(7),
     isLength = __webpack_require__(28);
 
 /**
@@ -298,6 +298,51 @@ module.exports = getNative;
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseGetTag = __webpack_require__(5),
+    isObject = __webpack_require__(2);
+
+/** `Object#toString` result references. */
+var asyncTag = '[object AsyncFunction]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    proxyTag = '[object Proxy]';
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+    if (!isObject(value)) {
+        return false;
+    }
+    // The use of `Object#toString` avoids issues with the `typeof` operator
+    // in Safari 9 which returns 'object' for typed arrays and other constructors.
+    var tag = baseGetTag(value);
+    return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+}
+
+module.exports = isFunction;
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -507,51 +552,6 @@ function doResolve(fn, promise) {
     reject(promise, LAST_ERROR);
   }
 }
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseGetTag = __webpack_require__(5),
-    isObject = __webpack_require__(2);
-
-/** `Object#toString` result references. */
-var asyncTag = '[object AsyncFunction]',
-    funcTag = '[object Function]',
-    genTag = '[object GeneratorFunction]',
-    proxyTag = '[object Proxy]';
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a function, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-    if (!isObject(value)) {
-        return false;
-    }
-    // The use of `Object#toString` avoids issues with the `typeof` operator
-    // in Safari 9 which returns 'object' for typed arrays and other constructors.
-    var tag = baseGetTag(value);
-    return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
-}
-
-module.exports = isFunction;
 
 /***/ }),
 /* 9 */
@@ -3226,7 +3226,7 @@ module.exports = DataView;
 "use strict";
 
 
-var isFunction = __webpack_require__(8),
+var isFunction = __webpack_require__(7),
     isMasked = __webpack_require__(79),
     isObject = __webpack_require__(2),
     toSource = __webpack_require__(45);
@@ -4534,7 +4534,7 @@ var assignMergeValue = __webpack_require__(47),
     isArray = __webpack_require__(0),
     isArrayLikeObject = __webpack_require__(116),
     isBuffer = __webpack_require__(14),
-    isFunction = __webpack_require__(8),
+    isFunction = __webpack_require__(7),
     isObject = __webpack_require__(2),
     isPlainObject = __webpack_require__(117),
     isTypedArray = __webpack_require__(15),
@@ -5434,7 +5434,7 @@ var _merge = __webpack_require__(18);
 
 var _merge2 = _interopRequireDefault(_merge);
 
-var _isFunction = __webpack_require__(8);
+var _isFunction = __webpack_require__(7);
 
 var _isFunction2 = _interopRequireDefault(_isFunction);
 
@@ -7001,7 +7001,7 @@ var _isempty = __webpack_require__(43);
 
 var _isempty2 = _interopRequireDefault(_isempty);
 
-var _isFunction = __webpack_require__(8);
+var _isFunction = __webpack_require__(7);
 
 var _isFunction2 = _interopRequireDefault(_isFunction);
 
@@ -7540,7 +7540,7 @@ module.exports = __webpack_require__(180);
 "use strict";
 
 
-module.exports = __webpack_require__(7);
+module.exports = __webpack_require__(8);
 __webpack_require__(181);
 __webpack_require__(182);
 __webpack_require__(183);
@@ -7554,7 +7554,7 @@ __webpack_require__(186);
 "use strict";
 
 
-var Promise = __webpack_require__(7);
+var Promise = __webpack_require__(8);
 
 module.exports = Promise;
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -7573,7 +7573,7 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
 "use strict";
 
 
-var Promise = __webpack_require__(7);
+var Promise = __webpack_require__(8);
 
 module.exports = Promise;
 Promise.prototype['finally'] = function (f) {
@@ -7599,7 +7599,7 @@ Promise.prototype['finally'] = function (f) {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var Promise = __webpack_require__(7);
+var Promise = __webpack_require__(8);
 
 module.exports = Promise;
 
@@ -7713,7 +7713,7 @@ Promise.prototype['catch'] = function (onRejected) {
 // This file contains then/promise specific extensions that are only useful
 // for node.js interop
 
-var Promise = __webpack_require__(7);
+var Promise = __webpack_require__(8);
 var asap = __webpack_require__(185);
 
 module.exports = Promise;
@@ -7865,7 +7865,7 @@ RawTask.prototype.call = function () {
 "use strict";
 
 
-var Promise = __webpack_require__(7);
+var Promise = __webpack_require__(8);
 
 module.exports = Promise;
 Promise.enableSynchronous = function () {
@@ -8321,6 +8321,10 @@ var _each = __webpack_require__(10);
 
 var _each2 = _interopRequireDefault(_each);
 
+var _isFunction = __webpack_require__(7);
+
+var _isFunction2 = _interopRequireDefault(_isFunction);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -8337,14 +8341,14 @@ var Interceptors = function () {
     value: function request(config) {
       // Resource
       (0, _each2.default)(_index2.default.interceptors, function (i) {
-        if (i.request) config = config.then(i.request);
-        if (i.requestError) config = config.catch(i.requestError);
+        if ((0, _isFunction2.default)(i.request)) config = config.then(i.request);
+        if ((0, _isFunction2.default)(i.requestError)) config = config.catch(i.requestError);
       });
 
       // Model
       (0, _each2.default)(this.Model.interceptors, function (i) {
-        if (i.request) config = config.then(i.request);
-        if (i.requestError) config = config.catch(i.requestError);
+        if ((0, _isFunction2.default)(i.request)) config = config.then(i.request);
+        if ((0, _isFunction2.default)(i.requestError)) config = config.catch(i.requestError);
       });
 
       return config;
@@ -8354,14 +8358,14 @@ var Interceptors = function () {
     value: function response(promise) {
       // Resource
       (0, _each2.default)(_index2.default.interceptors, function (i) {
-        if (i.response) promise = promise.then(i.response);
-        if (i.responseError) promise = promise.catch(i.responseError);
+        if ((0, _isFunction2.default)(i.response)) promise = promise.then(i.response);
+        if ((0, _isFunction2.default)(i.responseError)) promise = promise.catch(i.responseError);
       });
 
       // Model
       (0, _each2.default)(this.Model.interceptors, function (i) {
-        if (i.response) promise = promise.then(i.response);
-        if (i.responseError) promise = promise.catch(i.responseError);
+        if ((0, _isFunction2.default)(i.response)) promise = promise.then(i.response);
+        if ((0, _isFunction2.default)(i.responseError)) promise = promise.catch(i.responseError);
       });
 
       return promise;
