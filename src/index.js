@@ -6,6 +6,7 @@ import each from 'lodash/each';
 import isEmpty from 'lodash/isempty';
 import { defaults } from './utils/request';
 import ActionsBuilder from './ActionsBuilder';
+// import test from './test';
 
 export const fetchOptions = defaults;
 
@@ -32,4 +33,5 @@ export default function ReactResource(url, mappings = {}, customActions = {}) {
 
 if (typeof window !== undefined) {
   window.ReactResource = ReactResource;
+  // test();
 }

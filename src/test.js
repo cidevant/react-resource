@@ -3,7 +3,7 @@ import ReactResource from './index';
 export default function test() {
 
   // Create MODEL
-  const User = new ReactResource('/api/enums/?format=json', 
+  const User = new ReactResource('/api/enums/?format=json&test={:id}', 
     { id: ':id' }, 
     {
       // Override base action
@@ -11,6 +11,15 @@ export default function test() {
         params: {
           limit: 10,
           offset: 0,
+        },
+      },
+
+      get: {
+        transformRequest: (data) => {
+          return data;
+        },
+        transformResponse: (data) => {
+          return data;
         },
       },
 
@@ -28,13 +37,9 @@ export default function test() {
   
   const user = new User({ id: 1 });
   user.$get((u) => {
-    console.log('INSTANCE', u);
+    console.log('RESPONSE', u);
+    console.log('GETROLES', u.getRoles());
   });
-
-  User.get((i) => {
-    console.log('CLASS', i);
-    window.user = i;
-  })
 
   window.User = User;
 }

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack",
     "prepublish": "npm run build",
-    "start": "webpack-dev-server --content-base ./static/"
+    "start": "webpack-dev-server --content-base ./static/ --port 3000"
   },
   "main": "dist/index.js",
   "dependencies": {

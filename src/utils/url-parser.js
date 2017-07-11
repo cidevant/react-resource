@@ -15,7 +15,7 @@ export function parseUrl(url, mappings, data) {
   // Replace mappings `api/{:id}` => `api/10`
   each(mappings, (mapping, propertyName) => {
     const propertyValue = data[propertyName];
-    // Replace mapping key by source value if exists source value
+    // Replace mapping key by source value if it exists
     if(propertyValue) {
       outputUrl = outputUrl.replace(new RegExp(`\{${mapping}\}`, 'g'), propertyValue);
     } else {
@@ -24,7 +24,7 @@ export function parseUrl(url, mappings, data) {
     }
   });
 
-  // Clear URL from unmatched mappings
+  // Delete unmatched mappings from url
   outputUrl = outputUrl.replace(/\/?\{\:.+\}/i, "");
 
   return outputUrl;
@@ -55,14 +55,21 @@ export function getPathFromUrl(url) {
 }
 
 export function serialize(obj, prefix) {
-  var str = [], p;
+  const str = [];
+  let p;
+
   for(p in obj) {
     if (obj.hasOwnProperty(p)) {
-      var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
-      str.push((v !== null && typeof v === "object") ?
-        serialize(v, k) :
-        encodeURIComponent(k) + "=" + encodeURIComponent(v));
+      const key = prefix ? `${prefix}[${p}]` : p;
+      const value = obj[p];
+
+      str.push(
+        (value !== null && typeof value === "object") 
+          ? serialize(value, key)
+          : encodeURIComponent(key) + "=" + encodeURIComponent(value)
+      );
     }
   }
+  
   return str.join("&");
 }

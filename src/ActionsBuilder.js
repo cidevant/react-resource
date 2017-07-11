@@ -72,6 +72,7 @@ export default class ActionsBuilder {
        * First argument of class action is usually data,
        * but sometimes you can provide resolve callback function.
        */
+       
       Model[name] = (...kwargs) => {
         const data = isFunction(kwargs[0]) ? {} : kwargs.shift();
         const action = new Action(Model, name, cfg, data, mappings);

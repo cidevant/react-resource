@@ -4,6 +4,7 @@
 * Exposed global `whatwg-fetch` config (`fetchOptions`)
 * Send files
 * Make instances from action response data
+* `transformRequest` and `transformResponse` in action config
 * Webpack dev server
 
 ### 1.0.9

@@ -32,8 +32,13 @@ export default class Action {
    */
 
   configure(...kwargs) {
+    // Transform request data
+    const data = isFunction(this.config.transformRequest)
+      ? this.config.transformRequest(this.data)
+      : this.data;
+
     const argsConfig = argumentsParser(...kwargs);
-    const apiUrl = parseUrl(this.config.url, this.mappings, this.data);
+    const apiUrl = parseUrl(this.config.url, this.mappings, data);
     const apiUrlQuery = parseUrlQuery(apiUrl, argsConfig.params, this.config.params);
     const config = {
       url: `${getPathFromUrl(apiUrl)}?${apiUrlQuery}`,
@@ -46,7 +51,7 @@ export default class Action {
 
     // Append body
     if (includes(Action.httpMethodsWithBody, this.config.method.toLowerCase())) {
-      const body = isEmpty(argsConfig.body) ? this.data : argsConfig.body;
+      const body = !isEmpty(argsConfig.body) ? argsConfig.body : data;
 
       if (!isEmpty(body)) config.options.body = body;
     }
@@ -68,6 +73,11 @@ export default class Action {
     
     // Make instance/instances from request response
     promise = promise.then(this.tryInstantiate.bind(this));
+
+    // Transform response data
+    if (isFunction(this.config.transformResponse)) {
+      promise = promise.then(this.config.transformResponse);
+    }
 
     // Callbacks
     if (isFunction(resolveFn)) promise = promise.then(resolveFn);
