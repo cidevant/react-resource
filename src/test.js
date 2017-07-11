@@ -1,5 +1,27 @@
 import ReactResource from './index';
 
+// ReactResource.interceptors.push({
+//   // Request
+//   request: function (data) {
+//     console.log('ReactResource.interceptors - request', data);
+//     return data;
+//   },
+//   requestError: function (rejection) {
+//     console.log('ReactResource.interceptors - requestError', rejection);
+//     return rejection;
+//   },
+
+//   // Response
+//   response: function(response) {
+//     console.log('ReactResource.interceptors - response', response);
+//     return response;
+//   },
+//   responseError: function (rejection) {
+//     console.log('ReactResource.interceptors - responseError', rejection);
+//     return rejection;
+//   },
+// });
+
 export default function test() {
 
   // Create MODEL
@@ -31,14 +53,35 @@ export default function test() {
     }
   );
 
+  User.interceptors.push({
+    // Request
+    request: function (config) {
+      console.log('User.interceptors - request', config);
+      return config;
+    },
+    requestError: function (rejection) {
+      console.log('User.interceptors - requestError', rejection);
+      return rejection;
+    },
+
+    // Response
+    response: function(response) {
+      console.log('User.interceptors - response', response);
+      return response;
+    },
+    responseError: function (rejection) {
+      console.log('User.interceptors - responseError', rejection);
+      return rejection;
+    },
+  });
+
   User.prototype.getRoles = function() {
     return this.roles;
   }
   
   const user = new User({ id: 1 });
   user.$get((u) => {
-    console.log('RESPONSE', u);
-    console.log('GETROLES', u.getRoles());
+    console.log('user.$get', u);
   });
 
   window.User = User;
