@@ -5,13 +5,22 @@ First of all, we have to create our `Model` class from `ReactResource` factory:
 `const ModelName = new ReactResource(url, [mappings, [actions]])`
 
 * __url__ - {string} - Api endpoint url
-  `'/api/users/{:urlVariable}/?format=json'`
+
+  ```jsx
+  '/api/users/{:urlVariable}/?format=json'
+  ```
 
 * __mappings__ - {Object} - Replace variables in __url__ by values of model instance
-  `{ instanceAttribute: ':urlVariable'}`
+
+  ```jsx
+  { instanceAttribute: ':urlVariable'}
+  ```
 
 * __actions__ - {Object} - Add new actions or override default ones
-  `{ actionName: actionConfig }`
+
+  ```jsx
+  { actionName: actionConfig }
+  ```
 
 
 ## Custom instance methods
