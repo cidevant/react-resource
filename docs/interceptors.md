@@ -15,6 +15,7 @@ There are two kinds of interceptors (and two kinds of rejection interceptors):
 * `request`: interceptors get called with a http `config` object. The function is free to
   modify the `config` object or create a new one. The function needs to return the `config`
   object directly, or a promise containing the `config` or a new `config` object.
+> `config` = `{ url, options: { method, body }, resolveFn, rejectionFn }`
 * `requestError`: interceptor gets called when a previous interceptor threw an error or
   resolved with a rejection.
 * `response`: interceptors get called with http `response` object. The function is free to
@@ -23,58 +24,77 @@ There are two kinds of interceptors (and two kinds of rejection interceptors):
 * `responseError`: interceptor gets called when a previous interceptor threw an error or
   resolved with a rejection.
 
+Also there are two levels of interceptors:
+
+* __Global__: used for intercepting all requests of all `Models`
+* __Model class__: used for intercepting every `Model` action request
 
 ## Examples
 
 ```
-import ReactResource from 'react-resource';
+import ReactResource from './index';
 
-// Global interceptors
+/* 
+   Create `Model`
+   ========================================================================== */
+
+const User = new ReactResource('/api/users/{:id}', { id: ':id' });
+
+/* 
+   Global interceptors
+   ========================================================================== */
+
 ReactResource.interceptors.push({
   request: function (config) {
-    console.log('ReactResource.interceptors - request', config);
+    console.log('[INTERCEPTOR][GLOBAL][request]', config);
     return config;
   },
   requestError: function (rejection) {
-    console.log('ReactResource.interceptors - requestError', rejection);
+    console.log('[INTERCEPTOR][GLOBAL][requestError]', rejection);
     return rejection;
   },
   response: function(response) {
-    console.log('ReactResource.interceptors - response', response);
+    console.log('[INTERCEPTOR][GLOBAL][response]', response);
     return response;
   },
   responseError: function (rejection) {
-    console.log('ReactResource.interceptors - responseError', rejection);
+    console.log('[INTERCEPTOR][GLOBAL][responseError]', rejection);
     return rejection;
   },
 });
 
-const User = new ReactResource('/api/users/{:id}/?format=json', { id: ':id' });
+/* 
+   `Model` class interceptors
+   ========================================================================== */
 
-// Resource interceptors
 User.interceptors.push({
   request: function (config) {
-    console.log('User.interceptors - request', config);
+    console.log('[INTERCEPTOR][User][request]', config);
     return config;
   },
   requestError: function (rejection) {
-    console.log('User.interceptors - requestError', rejection);
+    console.log('[INTERCEPTOR][User][requestError]', rejection);
     return rejection;
   },
   response: function(response) {
-    console.log('User.interceptors - response', response);
+    console.log('[INTERCEPTOR][User][response]', response);
     return response;
   },
   responseError: function (rejection) {
-    console.log('User.interceptors - responseError', rejection);
+    console.log('[INTERCEPTOR][User][responseError]', rejection);
     return rejection;
   },
 });
 
 User.get({id: 1});
 
-// -> ReactResource.interceptors - request ...
-// -> User.interceptors - request ...
-// -> ReactResource.interceptors - response ...
-// -> User.interceptors - response ...
+/**
+ * Console output:
+ *
+ * 1) [INTERCEPTOR][GLOBAL][request] Object {url: "/api/users/1?", options: {method: "get"}, resolveFn: undefined, rejectionFn: undefined}
+ * 2) [INTERCEPTOR][User][request] Object {url: "/api/users/1?", options: {method: "get"}, resolveFn: undefined, rejectionFn: undefined}
+ * 3) [INTERCEPTOR][GLOBAL][response] ReactResourceModel {id: 1, ...}
+ * 4) [INTERCEPTOR][User][response] ReactResourceModel {id: 1, ...}
+ */
+
 ```
