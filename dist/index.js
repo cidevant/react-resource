@@ -1462,33 +1462,33 @@ function ReactResource() {
     kwargs[_key] = arguments[_key];
   }
 
-  var actionsBuilder = new (Function.prototype.bind.apply(_ActionsBuilder2.default, [null].concat(kwargs)))();
+  var actionsBuilder = new (Function.prototype.bind.apply(_ActionsBuilder2.default, [null].concat([Model], kwargs)))();
 
-  function ReactResourceModel() {
+  function Model() {
     var _this = this;
 
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    // Instantiate data
+    // Model instance data
     if (!(0, _isempty2.default)(data)) {
       (0, _each2.default)(data, function (val, key) {
         return _this[key] = val;
       });
     }
 
-    // Instance actions
-    actionsBuilder.instanceMethods(data, ReactResourceModel);
+    // Model instance actions
+    actionsBuilder.instanceMethods(data, Model);
 
     return this;
   };
 
-  // Model interceptors
-  ReactResourceModel.interceptors = [];
+  // Model class interceptors
+  Model.interceptors = [];
 
-  // Class actions
-  actionsBuilder.classMethods(ReactResourceModel);
+  // Model class actions
+  actionsBuilder.classMethods(Model);
 
-  return ReactResourceModel;
+  return Model;
 }
 
 // Global interceptors
@@ -5442,36 +5442,46 @@ var _Action = __webpack_require__(168);
 
 var _Action2 = _interopRequireDefault(_Action);
 
+var _Interceptors = __webpack_require__(192);
+
+var _Interceptors2 = _interopRequireDefault(_Interceptors);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ActionsBuilder = function () {
-  function ActionsBuilder(url, mappings, customActions) {
+  function ActionsBuilder(Model, url) {
     var _this = this;
+
+    var mappings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var customActions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
     _classCallCheck(this, ActionsBuilder);
 
-    // Resource config
+    // `ReactResource` config
     this.resource = {
       url: url,
       mappings: mappings,
       customActions: customActions
     };
 
-    // Configured actions
+    // `Model` actions configs
     this.actions = (0, _reduce2.default)((0, _merge2.default)(customActions, ActionsBuilder.defaults), function (accumulator, cfg, name) {
       accumulator[name] = _this.configure(name, cfg);
 
       return accumulator;
     }, {});
+
+    // `Model` interceptors
+    this.interceptors = new _Interceptors2.default(Model);
   }
 
   /**
-   * Merge default action config with ReactResource customActions config
+   * Merge default action config with `ReactResource` customActions config
    *
    * @param {String} name - Name of action
-   * @param {Object} arg - Default action config
+   * @param {Object} config - Default action config
    *
    * @return {Object} - Merged config
    */
@@ -5490,30 +5500,29 @@ var ActionsBuilder = function () {
     /**
      * Build class actions
      *
-     * @param {Class} Model - Target class for creating class methods
+     * @param {Class} Model - `Model` class for creating class methods
      *
-     * @return {Class} Model - Target class with class methods
+     * @return {Class} Model - `Model` class with class methods
      */
 
   }, {
     key: 'classMethods',
     value: function classMethods(Model) {
+      var _this2 = this;
+
       var mappings = this.resource.mappings;
 
 
       (0, _each2.default)(this.actions, function (cfg, name) {
-        /**
-         * First argument of class action is usually data,
-         * but sometimes you can provide resolve callback function.
-         */
-
+        // First argument can be `data` or successfull request `callback function`
         Model[name] = function () {
           for (var _len = arguments.length, kwargs = Array(_len), _key = 0; _key < _len; _key++) {
             kwargs[_key] = arguments[_key];
           }
 
+          // Extract `data` from arguments and pass it as param to `Action` constructor
           var data = (0, _isFunction2.default)(kwargs[0]) ? {} : kwargs.shift();
-          var action = new _Action2.default(Model, name, cfg, data, mappings);
+          var action = new _Action2.default(Model, name, cfg, data, mappings, _this2.interceptors);
 
           return action.promise.apply(action, kwargs);
         };
@@ -5525,21 +5534,23 @@ var ActionsBuilder = function () {
     /**
      * Build instance actions
      *
-     * @param {Object} data - Instance data
-     * @param {Class} Model - Target class for creating instance/prototype methods
+     * @param {Object} data - `Model` instance data for request
+     * @param {Class} Model - `Model` class for creating instance/prototype methods
      *
-     * @return {Class} Model - Target class with instance/prototype methods
+     * @return {Class} Model - `Model` class with instance/prototype methods
      */
 
   }, {
     key: 'instanceMethods',
     value: function instanceMethods(data, Model) {
+      var _this3 = this;
+
       var mappings = this.resource.mappings;
 
 
       (0, _each2.default)(this.actions, function (cfg, name) {
         Model.prototype['$' + name] = function () {
-          var action = new _Action2.default(Model, name, cfg, data, mappings);
+          var action = new _Action2.default(Model, name, cfg, data, mappings, _this3.interceptors);
 
           return action.promise.apply(action, arguments);
         };
@@ -5553,11 +5564,11 @@ var ActionsBuilder = function () {
 }();
 
 ActionsBuilder.defaults = {
-  'query': { url: undefined, params: {}, method: 'get', isArray: true },
-  'get': { url: undefined, params: {}, method: 'get', isArray: false },
-  'create': { url: undefined, params: {}, method: 'post', isArray: false },
-  'update': { url: undefined, params: {}, method: 'put', isArray: false },
-  'delete': { url: undefined, params: {}, method: 'delete', isArray: false }
+  'query': { url: undefined, params: {}, method: 'get' },
+  'get': { url: undefined, params: {}, method: 'get' },
+  'create': { url: undefined, params: {}, method: 'post' },
+  'update': { url: undefined, params: {}, method: 'put' },
+  'delete': { url: undefined, params: {}, method: 'delete' }
 };
 exports.default = ActionsBuilder;
 
@@ -7035,33 +7046,29 @@ var _argumentsParser2 = _interopRequireDefault(_argumentsParser);
 
 var _urlParser = __webpack_require__(191);
 
-var _Interceptors = __webpack_require__(192);
-
-var _Interceptors2 = _interopRequireDefault(_Interceptors);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Action = function () {
-  function Action(Model, name, config, data, mappings) {
+  function Action(Model, name, config, data, mappings, interceptors) {
     _classCallCheck(this, Action);
 
-    this.Model = Model; // class for making instances
-    this.name = name;
-    this.config = config;
-    this.data = data; // for url and request body
-    this.mappings = mappings; // for url
-    this.interceptors = new _Interceptors2.default(Model); // request & response interceptors
+    this.Model = Model; // `Model` class
+    this.name = name; // action name
+    this.config = config; // action default config
+    this.data = data; // `Model` instance data (usage: [action url construction, action request body])
+    this.mappings = mappings; // for construction action url
+    this.interceptors = interceptors; // `request` config and `response` data control
   }
 
   /**
-   * Make config promise for request.
-   * Promise is used for ability to use request interceptors.
+   * Build `request config` 
    *
    * @param {Array} kwarg - List of arguments provided to action
    *
-   * @return {Promise} config - Promise with generated config
+   * @return {Promise} config - Config vrapped in Promise for processing in interceptors
+   * @structure {Promise} config - { url, options: { method, [body] }, [resolveFn, [rejectionFn]] }
    */
 
   _createClass(Action, [{
@@ -7074,12 +7081,14 @@ var Action = function () {
       }
 
       return new _promise2.default(function (resolve, reject) {
-        // Transform request data
-        var data = (0, _isFunction2.default)(_this.config.transformRequest) ? _this.config.transformRequest(_this.data) : _this.data;
-
+        // Parse action arguments
         var argsConfig = _argumentsParser2.default.apply(undefined, kwargs);
-        var apiUrl = (0, _urlParser.parseUrl)(_this.config.url, _this.mappings, data);
+
+        // Build request url
+        var apiUrl = (0, _urlParser.parseUrl)(_this.config.url, _this.mappings, _this.data);
         var apiUrlQuery = (0, _urlParser.parseUrlQuery)(apiUrl, argsConfig.params, _this.config.params);
+
+        // Config
         var config = {
           url: (0, _urlParser.getPathFromUrl)(apiUrl) + '?' + apiUrlQuery,
           options: {
@@ -7089,11 +7098,16 @@ var Action = function () {
           rejectionFn: argsConfig.rejectionFn
         };
 
-        // Append body
+        // Request body
         if ((0, _includes2.default)(Action.httpMethodsWithBody, _this.config.method.toLowerCase())) {
-          var body = !(0, _isempty2.default)(argsConfig.body) ? argsConfig.body : data;
+          var body = !(0, _isempty2.default)(argsConfig.body) ? argsConfig.body : _this.data;
 
-          if (!(0, _isempty2.default)(body)) config.options.body = body;
+          if (!(0, _isempty2.default)(body)) {
+            // Use `transformRequest`
+            var transformedBody = (0, _isFunction2.default)(_this.config.transformRequest) ? _this.config.transformRequest(body) : body;
+
+            config.options.body = JSON.stringify(transformedBody);
+          }
         }
 
         resolve(config);
@@ -7113,8 +7127,10 @@ var Action = function () {
     value: function promise() {
       var _this2 = this;
 
-      // Request interceptors
-      return this.interceptors.request(this.configure.apply(this, arguments)).then(function (_ref) {
+      var cfg = this.configure.apply(this, arguments);
+
+      return this.interceptors.request(cfg) // Use `request` interceptor
+      .then(function (_ref) {
         var url = _ref.url,
             options = _ref.options,
             resolveFn = _ref.resolveFn,
@@ -7122,13 +7138,13 @@ var Action = function () {
 
         var promise = (0, _request2.default)(url, options);
 
-        // Response interceptors
+        // Make instance/instances from response
+        promise = _this2.makeInstances(promise);
+
+        // Use `response` interceptor
         promise = _this2.interceptors.response(promise);
 
-        // Make instance/instances from request response
-        promise = _this2.tryInstantiate(promise);
-
-        // Transform response data
+        // Use `transformResponse`
         if ((0, _isFunction2.default)(_this2.config.transformResponse)) {
           promise = promise.then(_this2.config.transformResponse);
         }
@@ -7142,26 +7158,24 @@ var Action = function () {
     }
 
     /**
-     * Try to make instance/instances from action response data
+     * Make instance/instances from action response data
      *
-     * @param {Object/Array} {data} - Action response json data
+     * @param {Promise} promise - Action response promise
      *
-     * @return {Object/Array} data - Maybe instance/instances of Model class
+     * @return {Object|Array} data - Maybe instance/instances of `Model` class
      */
 
   }, {
-    key: 'tryInstantiate',
-    value: function tryInstantiate(promise) {
+    key: 'makeInstances',
+    value: function makeInstances(promise) {
       var _this3 = this;
 
       return promise.then(function (data) {
-        var isDataArray = (0, _isArray2.default)(data);
-
-        if (isDataArray && _this3.config.isArray) {
+        if ((0, _isArray2.default)(data)) {
           return (0, _map2.default)(data, function (i) {
             return new _this3.Model(i);
           });
-        } else if (!isDataArray && (0, _isObject2.default)(data) && !_this3.config.isArray) {
+        } else if ((0, _isObject2.default)(data)) {
           return new _this3.Model(data);
         }
 
@@ -8298,7 +8312,15 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * Interceptors
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * =============================================================================
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Before you start creating interceptors, be sure to understand the deferred/promise APIs.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * For purposes of global error handling, authentication, or any kind of synchronous or
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * asynchronous pre-processing of request or postprocessing of responses, it is desirable to be
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * able to intercept requests before they are handed to the server and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * responses before they are handed over to the application code that
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * initiated these requests.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * There are two kinds of interceptors (and two kinds of rejection interceptors):
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *   * `request`: interceptors get called with a http `config` object. The function is free to
@@ -8311,6 +8333,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *     object directly, or as a promise containing the `response` or a new `response` object.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *   * `responseError`: interceptor gets called when a previous interceptor threw an error or
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *     resolved with a rejection.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 var _index = __webpack_require__(36);
