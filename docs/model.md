@@ -21,7 +21,7 @@ Also we can extend `Model` with custom instance/prototype methods
 > Don't use __ARROW FUNCTION__! 
 > Use __FUNCTION DEFINITION__ instead!
 
-```
+```jsx
 import ReactResource from 'react-resource';
 
 /**

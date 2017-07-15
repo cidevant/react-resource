@@ -4,7 +4,7 @@ Action describes the request to be made and how it should be processed.
 
 ## Default actions
 
-```js
+```jsx
 // { actionName: actionConfig }
 { 
   'query': { method: 'GET' },
@@ -64,7 +64,7 @@ There are two types of arguments list:
 
 * __Full__ (first argument is __Object__)
 
-  ```
+  ```jsx
   // Class method action
   Model.create(initObject, [params, [body, [resolveFn, [rejectFn]]]])
 
@@ -75,7 +75,7 @@ There are two types of arguments list:
 
 * __Callbacks__ (first argument is __Function__)
 
-  ```
+  ```jsx
   // Class method action
   Model.query(resolveFn, [rejectFn])
 

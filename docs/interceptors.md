@@ -31,7 +31,7 @@ Also there are two levels of interceptors:
 
 ## Examples
 
-```
+```jsx
 import ReactResource from './index';
 
 /* 

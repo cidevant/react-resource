@@ -2,7 +2,7 @@
 
 You can send files, by modifying `body` argument of action call.
 
-```
+```jsx
 import ReactResource from 'react-resource';
 
 // User model
