@@ -1,87 +1,62 @@
 import ReactResource from './index';
-
+import map from 'lodash/map';
 export default function test() {
-  ReactResource.interceptors.push({
-    // Request
-    request: function (data) {
-      console.log('ReactResource.interceptors - request', data);
-      return data;
-    },
-    requestError: function (rejection) {
-      console.log('ReactResource.interceptors - requestError', rejection);
-      return rejection;
-    },
+  /* 
+     Create `Model`
+     ========================================================================== */
 
-    // Response
-    response: function(response) {
-      console.log('ReactResource.interceptors - response', response);
-      return response;
-    },
-    responseError: function (rejection) {
-      console.log('ReactResource.interceptors - responseError', rejection);
-      return rejection;
-    },
-  });
-
-  // Create MODEL
-  const User = new ReactResource('/api/enums/?format=json&test={:id}', 
+  const User = new ReactResource('/api/users/{:id}.json', 
     { id: ':id' }, 
     {
-      // Override base action
+      // override `query` action config
       query: {
+        //Default action params - enables pagination in response
         params: {
           limit: 10,
           offset: 0,
         },
+
+        /**
+         * Transform paginated response from server.
+         * Make `User` model instances from response data.
+         *
+         * @param {Object} response - `{count: 2, results: [userData1, userData2]}`
+         *
+         * @return {Object} - `{count: 2, results: [new User(userData1), new User(userData2)]}`
+         */
+        
+        transformResponse: (response) => {
+          const transformedResponse = {
+            ...response,
+            results: map(response.results, (userData) => new User(userData)),
+          };
+
+          console.log('[User][QUERY][transformResponse] from: ', response);
+          console.log('[User][QUERY][transformResponse] to: ', transformedResponse);
+
+          return transformedResponse;
+        },
       },
 
-      get: {
+      // override `create` action config
+      create: {
         transformRequest: (data) => {
-          return data;
-        },
-        transformResponse: (data) => {
-          return data;
-        },
-      },
+          // server requires json in format `{user: data}`
+          const userJson = { user: data };
 
-      // Create custom action
-      myAction: {
-        method: 'get',
-        url: '/users/{:id}/custom_action/?format=json',
+          console.log('[User][CREATE][transformRequest] from: ', data);
+          console.log('[User][CREATE][transformRequest] to: ', userJson);
+
+          return userJson;
+        },
       },
     }
   );
 
-  User.interceptors.push({
-    // Request
-    request: function (config) {
-      console.log('User.interceptors - request', config);
-      return config;
-    },
-    requestError: function (rejection) {
-      console.log('User.interceptors - requestError', rejection);
-      return rejection;
-    },
 
-    // Response
-    response: function(response) {
-      console.log('User.interceptors - response', response);
-      return response;
-    },
-    responseError: function (rejection) {
-      console.log('User.interceptors - responseError', rejection);
-      return rejection;
-    },
+  const user = new User({first_name: 'John', last_name: 'Doe'});
+  user.$create({}, {lol: 'TEST'},(user) => {
+    console.warn('User', user)
   });
 
-  User.prototype.getRoles = function() {
-    return this.roles;
-  }
-  
-  const user = new User({ id: 1 });
-  user.$get((u) => {
-    console.log('user.$get', u);
-  });
-
-  window.User = User;
 }

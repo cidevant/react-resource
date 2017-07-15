@@ -12,27 +12,27 @@ import ActionsBuilder from './ActionsBuilder';
 export const fetchOptions = defaults;
 
 export default function ReactResource(...kwargs) {
-  const actionsBuilder = new ActionsBuilder(...kwargs);
+  const actionsBuilder = new ActionsBuilder(Model, ...kwargs);
 
-  function ReactResourceModel(data = {}) {
-    // Instantiate data
+  function Model(data = {}) {
+    // Model instance data
     if (!isEmpty(data)) {
       each(data, (val, key) => this[key] = val);
     }
 
-    // Instance actions
-    actionsBuilder.instanceMethods(data, ReactResourceModel);
+    // Model instance actions
+    actionsBuilder.instanceMethods(data, Model);
 
     return this;
   };
 
-  // Model interceptors
-  ReactResourceModel.interceptors = [];
+  // Model class interceptors
+  Model.interceptors = [];
 
-  // Class actions
-  actionsBuilder.classMethods(ReactResourceModel);
+  // Model class actions
+  actionsBuilder.classMethods(Model);
 
-  return ReactResourceModel;
+  return Model;
 }
 
 // Global interceptors

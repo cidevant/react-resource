@@ -1,6 +1,6 @@
 # Interceptors
 
-> Copied from AngularJs source code comments
+> Copied from AngularJs (1.3) source code comments
 
 Before you start creating interceptors, be sure to understand the deferred/promise APIs.
 
@@ -46,19 +46,19 @@ const User = new ReactResource('/api/users/{:id}', { id: ':id' });
 
 ReactResource.interceptors.push({
   request: function (config) {
-    console.log('[INTERCEPTOR][GLOBAL][request]', config);
+    console.log('[INTERCEPTOR][Global][request]', config);
     return config;
   },
   requestError: function (rejection) {
-    console.log('[INTERCEPTOR][GLOBAL][requestError]', rejection);
+    console.log('[INTERCEPTOR][Global][requestError]', rejection);
     return rejection;
   },
   response: function(response) {
-    console.log('[INTERCEPTOR][GLOBAL][response]', response);
+    console.log('[INTERCEPTOR][Global][response]', response);
     return response;
   },
   responseError: function (rejection) {
-    console.log('[INTERCEPTOR][GLOBAL][responseError]', rejection);
+    console.log('[INTERCEPTOR][Global][responseError]', rejection);
     return rejection;
   },
 });
@@ -91,10 +91,10 @@ User.get({id: 1});
 /**
  * Console output:
  *
- * 1) [INTERCEPTOR][GLOBAL][request] Object {url: "/api/users/1?", options: {method: "get"}, resolveFn: undefined, rejectionFn: undefined}
+ * 1) [INTERCEPTOR][Global][request] Object {url: "/api/users/1?", options: {method: "get"}, resolveFn: undefined, rejectionFn: undefined}
  * 2) [INTERCEPTOR][User][request] Object {url: "/api/users/1?", options: {method: "get"}, resolveFn: undefined, rejectionFn: undefined}
- * 3) [INTERCEPTOR][GLOBAL][response] ReactResourceModel {id: 1, ...}
- * 4) [INTERCEPTOR][User][response] ReactResourceModel {id: 1, ...}
+ * 3) [INTERCEPTOR][Global][response] Model {id: 1, ...}
+ * 4) [INTERCEPTOR][User][response] Model {id: 1, ...}
  */
 
 ```

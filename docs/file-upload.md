@@ -1,12 +1,12 @@
 # Send files
 
-You can send files, by modifying `body` argument in action call.
+You can send files, by modifying `body` argument of action call.
 
 ```
 import ReactResource from 'react-resource';
 
 // User model
-const User = new ReactResource('/api/users/{:id}/?format=json', { id: ':id' });
+const User = new ReactResource('/api/users/{:id}', { id: ':id' });
 
 // User instance
 const user = new User({id: 10});

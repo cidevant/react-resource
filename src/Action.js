@@ -12,39 +12,38 @@ import Promise from 'promise';
 import request from './utils/request';
 import argumentsParser from './utils/arguments-parser';
 import { parseUrl, parseUrlQuery, getPathFromUrl } from './utils/url-parser';
-import Interceptors from './Interceptors';
 
 export default class Action {
   static httpMethodsWithBody = ['post', 'put', 'patch', 'delete'];
 
-  constructor(Model, name, config, data, mappings) {
-    this.Model = Model; // class for making instances
-    this.name = name;
-    this.config = config;
-    this.data = data; // for url and request body
-    this.mappings = mappings; // for url
-    this.interceptors = new Interceptors(Model); // request & response interceptors
+  constructor(Model, name, config, data, mappings, interceptors) {
+    this.Model = Model; // `Model` class
+    this.name = name; // action name
+    this.config = config; // action default config
+    this.data = data; // `Model` instance data (usage: [action url construction, action request body])
+    this.mappings = mappings; // for construction action url
+    this.interceptors = interceptors; // `request` config and `response` data control
   }
 
   /**
-   * Make config promise for request.
-   * Promise is used for ability to use request interceptors.
+   * Build `request config` 
    *
    * @param {Array} kwarg - List of arguments provided to action
    *
-   * @return {Promise} config - Promise with generated config
+   * @return {Promise} config - Config vrapped in Promise for processing in interceptors
+   * @structure {Promise} config - { url, options: { method, [body] }, [resolveFn, [rejectionFn]] }
    */
 
   configure(...kwargs) {
     return new Promise((resolve, reject) => {
-      // Transform request data
-      const data = isFunction(this.config.transformRequest)
-        ? this.config.transformRequest(this.data)
-        : this.data;
-
+      // Parse action arguments
       const argsConfig = argumentsParser(...kwargs);
-      const apiUrl = parseUrl(this.config.url, this.mappings, data);
+
+      // Build request url
+      const apiUrl = parseUrl(this.config.url, this.mappings, this.data);
       const apiUrlQuery = parseUrlQuery(apiUrl, argsConfig.params, this.config.params);
+      
+      // Config
       const config = {
         url: `${getPathFromUrl(apiUrl)}?${apiUrlQuery}`,
         options: {
@@ -54,11 +53,18 @@ export default class Action {
         rejectionFn: argsConfig.rejectionFn,
       };
 
-      // Append body
+      // Request body
       if (includes(Action.httpMethodsWithBody, this.config.method.toLowerCase())) {
-        const body = !isEmpty(argsConfig.body) ? argsConfig.body : data;
+        const body = !isEmpty(argsConfig.body) ? argsConfig.body : this.data;
 
-        if (!isEmpty(body)) config.options.body = body;
+        if (!isEmpty(body)) {
+          // Use `transformRequest`
+          const transformedBody = isFunction(this.config.transformRequest)
+            ? this.config.transformRequest(body)
+            : body;
+
+          config.options.body = JSON.stringify(transformedBody);
+        }
       }
 
       resolve(config);
@@ -74,18 +80,20 @@ export default class Action {
    */
 
   promise(...kwargs) {
-    // Request interceptors
-    return this.interceptors.request(this.configure(...kwargs))
+    const cfg = this.configure(...kwargs);
+
+    return this.interceptors
+      .request(cfg) // Use `request` interceptor
       .then(({ url, options, resolveFn, rejectionFn }) => {
         let promise = request(url, options);
+
+        // Make instance/instances from response
+        promise = this.makeInstances(promise);
         
-        // Response interceptors
+        // Use `response` interceptor
         promise = this.interceptors.response(promise);
 
-        // Make instance/instances from request response
-        promise = this.tryInstantiate(promise);
-
-        // Transform response data
+        // Use `transformResponse`
         if (isFunction(this.config.transformResponse)) {
           promise = promise.then(this.config.transformResponse);
         }
@@ -99,20 +107,18 @@ export default class Action {
   }
 
   /**
-   * Try to make instance/instances from action response data
+   * Make instance/instances from action response data
    *
-   * @param {Object/Array} {data} - Action response json data
+   * @param {Promise} promise - Action response promise
    *
-   * @return {Object/Array} data - Maybe instance/instances of Model class
+   * @return {Object|Array} data - Maybe instance/instances of `Model` class
    */
 
-  tryInstantiate(promise) {
+  makeInstances(promise) {
     return promise.then((data) => {
-      const isDataArray = isArray(data);
-
-      if (isDataArray && this.config.isArray) {
+      if (isArray(data)) {
         return map(data, (i) => new this.Model(i));
-      } else if (!isDataArray && isObject(data) && !this.config.isArray) {
+      } else if (isObject(data)) {
         return new this.Model(data);
       }
       
