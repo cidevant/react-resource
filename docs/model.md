@@ -16,7 +16,7 @@ First of all, we have to create our `Model` class from `ReactResource` factory:
 { instanceAttribute: ':urlVariable'}
 ```
 
-* __actions__ - {Object} - Add new [actions](docs/actions.md) or override default ones
+* __actions__ - {Object} - Add new [actions](./actions.md) or override default ones
 
 ```jsx
 { actionName: actionConfig }
