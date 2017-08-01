@@ -1,9 +1,9 @@
 {
   "name": "react-resource",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A factory which creates a resource object that lets you interact with RESTful server-side data sources.",
   "scripts": {
-    "build": "babel ./src --out-file ./dist/index.js",
+    "build": "babel ./src --out-dir ./dist",
     "prepublish": "npm run build",
     "start": "webpack-dev-server --content-base ./static/ --port 3000"
   },
