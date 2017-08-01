@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "A factory which creates a resource object that lets you interact with RESTful server-side data sources.",
   "scripts": {
-    "build": "webpack",
+    "build": "babel ./src/index.js -o ./dist/index.js",
     "prepublish": "npm run build",
     "start": "webpack-dev-server --content-base ./static/ --port 3000"
   },
@@ -14,6 +14,7 @@
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
