@@ -3,15 +3,14 @@
    ========================================================================== */
 
 import merge from 'lodash/merge';
-import inRange from 'lodash/inrange';
-import isEqual from 'lodash/isequal';
+import isEqual from 'lodash/isEqual';
 import map from 'lodash/map';
 
 // Defaults
 const defaults = {
   params: {},
   body: {},
-  resolveFn: undefined, 
+  resolveFn: undefined,
   rejectionFn: undefined,
 };
 
@@ -51,7 +50,7 @@ const argsParser = {
       return { params: kwargs[0], resolveFn: kwargs[1], rejectionFn: kwargs[2] };
     }
   },
-  
+
   // Model.action([query, [body, [resolveFn, [rejectionFn]]]]);
   4: (...kwargs) => {
     if (areTypesEqual(['object', 'object', 'function', 'function'], kwargs)) {
@@ -67,7 +66,7 @@ export default function argumentsParser(...kwargs) {
   return merge(argsConfig, defaults);
 }
 
-/* 
+/*
    Helpers
    ========================================================================== */
 

@@ -15,9 +15,9 @@ var _each = require('lodash/each');
 
 var _each2 = _interopRequireDefault(_each);
 
-var _isempty = require('lodash/isempty');
+var _isEmpty = require('lodash/isEmpty');
 
-var _isempty2 = _interopRequireDefault(_isempty);
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _request = require('./utils/request');
 
@@ -45,7 +45,7 @@ function ReactResource() {
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     // Model instance data
-    if (!(0, _isempty2.default)(data)) {
+    if (!(0, _isEmpty2.default)(data)) {
       (0, _each2.default)(data, function (val, key) {
         return _this[key] = val;
       });

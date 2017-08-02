@@ -8,9 +8,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Action
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ========================================================================== */
 
-var _isempty = require('lodash/isempty');
+var _isEmpty = require('lodash/isEmpty');
 
-var _isempty2 = _interopRequireDefault(_isempty);
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _isFunction = require('lodash/isFunction');
 
@@ -63,7 +63,7 @@ var Action = function () {
   }
 
   /**
-   * Build `request config` 
+   * Build `request config`
    *
    * @param {Array} kwarg - List of arguments provided to action
    *
@@ -100,9 +100,9 @@ var Action = function () {
 
         // Request body
         if ((0, _includes2.default)(Action.httpMethodsWithBody, _this.config.method.toLowerCase())) {
-          var body = !(0, _isempty2.default)(argsConfig.body) ? argsConfig.body : _this.data;
+          var body = !(0, _isEmpty2.default)(argsConfig.body) ? argsConfig.body : _this.data;
 
-          if (!(0, _isempty2.default)(body)) {
+          if (!(0, _isEmpty2.default)(body)) {
             // Use `transformRequest`
             var transformedBody = (0, _isFunction2.default)(_this.config.transformRequest) ? _this.config.transformRequest(body) : body;
 
@@ -116,8 +116,8 @@ var Action = function () {
 
     /**
      * Build and fetch action request
-     * 
-     * @param {Array} kwarg - Array of arguments provided for action 
+     *
+     * @param {Array} kwarg - Array of arguments provided for action
      *
      * @return {Promise} promise - Promise of action request
      */

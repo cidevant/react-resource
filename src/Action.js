@@ -2,7 +2,7 @@
    Action
    ========================================================================== */
 
-import isEmpty from 'lodash/isempty';
+import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
@@ -26,7 +26,7 @@ export default class Action {
   }
 
   /**
-   * Build `request config` 
+   * Build `request config`
    *
    * @param {Array} kwarg - List of arguments provided to action
    *
@@ -42,7 +42,7 @@ export default class Action {
       // Build request url
       const apiUrl = parseUrl(this.config.url, this.mappings, this.data);
       const apiUrlQuery = parseUrlQuery(apiUrl, argsConfig.params, this.config.params);
-      
+
       // Config
       const config = {
         url: `${getPathFromUrl(apiUrl)}?${apiUrlQuery}`,
@@ -73,8 +73,8 @@ export default class Action {
 
   /**
    * Build and fetch action request
-   * 
-   * @param {Array} kwarg - Array of arguments provided for action 
+   *
+   * @param {Array} kwarg - Array of arguments provided for action
    *
    * @return {Promise} promise - Promise of action request
    */
@@ -89,7 +89,7 @@ export default class Action {
 
         // Make instance/instances from response
         promise = this.makeInstances(promise);
-        
+
         // Use `response` interceptor
         promise = this.interceptors.response(promise);
 
@@ -121,7 +121,7 @@ export default class Action {
       } else if (isObject(data)) {
         return new this.Model(data);
       }
-      
+
       return data;
     });
   }
