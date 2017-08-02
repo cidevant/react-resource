@@ -28,7 +28,7 @@ First of all, we have to create our `Model` class from `ReactResource` factory:
 Also we can extend `Model` with custom instance/prototype methods
 
 > Don't use __ARROW FUNCTION__! 
-> Use __FUNCTION DEFINITION__ instead!
+> Use __FUNCTION EXPRESSION__ instead!
 
 ```jsx
 import ReactResource from 'react-resource';
