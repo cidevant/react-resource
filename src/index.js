@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import each from 'lodash/each';
-import isEmpty from 'lodash/isempty';
+import isEmpty from 'lodash/isEmpty';
 import { defaults } from './utils/request';
 import ActionsBuilder from './ActionsBuilder';
 // import test from './test';

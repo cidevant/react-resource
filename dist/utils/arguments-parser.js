@@ -14,13 +14,9 @@ var _merge = require('lodash/merge');
 
 var _merge2 = _interopRequireDefault(_merge);
 
-var _inrange = require('lodash/inrange');
+var _isEqual = require('lodash/isEqual');
 
-var _inrange2 = _interopRequireDefault(_inrange);
-
-var _isequal = require('lodash/isequal');
-
-var _isequal2 = _interopRequireDefault(_isequal);
+var _isEqual2 = _interopRequireDefault(_isEqual);
 
 var _map = require('lodash/map');
 
@@ -108,7 +104,7 @@ function argumentsParser() {
   return (0, _merge2.default)(argsConfig, defaults);
 }
 
-/* 
+/*
    Helpers
    ========================================================================== */
 
@@ -118,7 +114,7 @@ function areTypesEqual(pattern, kwargs) {
       return typeof i === 'undefined' ? 'undefined' : _typeof(i);
     });
 
-    return (0, _isequal2.default)(pattern, kwargsTypes);
+    return (0, _isEqual2.default)(pattern, kwargsTypes);
   }
 
   return false;
