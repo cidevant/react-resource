@@ -38,7 +38,7 @@ export default function ReactResource(...kwargs) {
 // Global interceptors
 ReactResource.interceptors = [];
 
-if (typeof window !== undefined) {
+if (typeof window !== 'undefined') {
   window.ReactResource = ReactResource;
   // test();
 }
