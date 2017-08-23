@@ -2,7 +2,7 @@
    ReactResource
    ========================================================================== */
 
-import each from 'lodash/each';
+import assign from 'lodash/assign';
 import isEmpty from 'lodash/isEmpty';
 import { defaults } from './utils/request';
 import ActionsBuilder from './ActionsBuilder';
@@ -16,9 +16,7 @@ export default function ReactResource(...kwargs) {
 
   function Model(data = {}) {
     // Model instance data
-    if (!isEmpty(data)) {
-      each(data, (val, key) => this[key] = val);
-    }
+    assign(this, data);
 
     // Model instance actions
     actionsBuilder.instanceMethods(data, Model);
