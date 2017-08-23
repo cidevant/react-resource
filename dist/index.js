@@ -10,10 +10,6 @@ var _assign = require('lodash/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
 
-var _isEmpty = require('lodash/isEmpty');
-
-var _isEmpty2 = _interopRequireDefault(_isEmpty);
-
 var _request = require('./utils/request');
 
 var _ActionsBuilder = require('./ActionsBuilder');
@@ -25,11 +21,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import test from './test';
 
 // Expose global 'whatwg-fetch' options
-/* ==========================================================================
-   ReactResource
-   ========================================================================== */
-
-var fetchOptions = exports.fetchOptions = _request.defaults;
+var fetchOptions = exports.fetchOptions = _request.defaults; /* ==========================================================================
+                                                                ReactResource
+                                                                ========================================================================== */
 
 function ReactResource() {
   for (var _len = arguments.length, kwargs = Array(_len), _key = 0; _key < _len; _key++) {
@@ -42,9 +36,7 @@ function ReactResource() {
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     // Model instance data
-    if (!(0, _isEmpty2.default)(data)) {
-      (0, _assign2.default)(this, data);
-    }
+    (0, _assign2.default)(this, data);
 
     // Model instance actions
     actionsBuilder.instanceMethods(data, Model);
