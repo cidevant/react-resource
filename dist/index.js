@@ -21,10 +21,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import test from './test';
 
 // Expose global 'whatwg-fetch' options
-var fetchOptions = exports.fetchOptions = _request.defaults;
 /* ==========================================================================
-ReactResource
-========================================================================== */
+   ReactResource
+   ========================================================================== */
+
+var fetchOptions = exports.fetchOptions = _request.defaults;
 
 function ReactResource() {
   for (var _len = arguments.length, kwargs = Array(_len), _key = 0; _key < _len; _key++) {
