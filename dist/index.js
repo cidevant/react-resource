@@ -6,13 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.fetchOptions = undefined;
 exports.default = ReactResource;
 
-var _each = require('lodash/each');
+var _assign = require('lodash/assign');
 
-var _each2 = _interopRequireDefault(_each);
-
-var _isEmpty = require('lodash/isEmpty');
-
-var _isEmpty2 = _interopRequireDefault(_isEmpty);
+var _assign2 = _interopRequireDefault(_assign);
 
 var _request = require('./utils/request');
 
@@ -39,16 +35,10 @@ function ReactResource() {
   var actionsBuilder = new (Function.prototype.bind.apply(_ActionsBuilder2.default, [null].concat([Model], kwargs)))();
 
   function Model() {
-    var _this = this;
-
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     // Model instance data
-    if (!(0, _isEmpty2.default)(data)) {
-      (0, _each2.default)(data, function (val, key) {
-        return _this[key] = val;
-      });
-    }
+    (0, _assign2.default)(this, data);
 
     // Model instance actions
     actionsBuilder.instanceMethods(data, Model);
