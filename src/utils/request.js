@@ -41,7 +41,23 @@ export default function request(url, options = {}) {
  */
 
 export function parseJSON(response) {
-  return response.json();
+  if (!isJSON(response.headers)) {
+    return response.text();
+  } else {
+    return response.json();
+  }
+}
+
+/**
+ * Verifies that the content returned is JSON
+ *
+ * @param  {object} headers from the network response
+ *
+ * @return {boolean} Whether the content-type includes JSON or not
+ */
+
+function isJSON(headers) {
+  return headers.get('content-type').match(/json/i);
 }
 
 /**
