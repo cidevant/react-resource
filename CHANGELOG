@@ -1,3 +1,7 @@
+### 2.0.7
+
+* handle non JSON responses
+
 ### 2.0.6
 
 * Fixed instatiation of Model data
