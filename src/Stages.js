@@ -29,20 +29,21 @@ import ReactResource from './index';
 import each from 'lodash/each';
 import isFunction from 'lodash/isFunction';
 
-export default class Interceptors {
-  constructor(Model) {
+export default class Stages {
+  constructor(Model, which) {
     this.Model = Model;
+    this.which = which;
   }
 
   request(config) {
     // Resource
-    each(ReactResource.interceptors, (i) => {
+    each(ReactResource[this.which], (i) => {
       if (isFunction(i.request)) config = config.then(i.request);
       if (isFunction(i.requestError)) config = config.catch(i.requestError);
     });
 
     // Model
-    each(this.Model.interceptors, (i) => {
+    each(this.Model[this.which], (i) => {
       if (isFunction(i.request)) config = config.then(i.request);
       if (isFunction(i.requestError)) config = config.catch(i.requestError);
     });
@@ -52,13 +53,13 @@ export default class Interceptors {
 
   response(promise) {
     // Resource
-    each(ReactResource.interceptors, (i) => {
+    each(ReactResource[this.which], (i) => {
       if (isFunction(i.response)) promise = promise.then(i.response);
       if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
     });
 
     // Model
-    each(this.Model.interceptors, (i) => {
+    each(this.Model[this.which], (i) => {
       if (isFunction(i.response)) promise = promise.then(i.response);
       if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
     });
