@@ -16,13 +16,14 @@ import { parseUrl, parseUrlQuery, getPathFromUrl } from './utils/url-parser';
 export default class Action {
   static httpMethodsWithBody = ['post', 'put', 'patch', 'delete'];
 
-  constructor(Model, name, config, data, mappings, interceptors) {
+  constructor(Model, name, config, data, mappings, interceptors, transformers) {
     this.Model = Model; // `Model` class
     this.name = name; // action name
     this.config = config; // action default config
     this.data = data; // `Model` instance data (usage: [action url construction, action request body])
     this.mappings = mappings; // for construction action url
     this.interceptors = interceptors; // `request` config and `response` data control
+    this.transformers = transformers;
   }
 
   /**
@@ -80,12 +81,15 @@ export default class Action {
    */
 
   promise(...kwargs) {
-    const cfg = this.configure(...kwargs);
+    let cfg = this.configure(...kwargs);
+    cfg = this.interceptors.request(cfg); // Use `request` interceptor
+    cfg = this.transformers.request(cfg);
 
-    return this.interceptors
-      .request(cfg) // Use `request` interceptor
+    return cfg
       .then(({ url, options, resolveFn, rejectionFn }) => {
         let promise = request(url, options);
+
+        promise = this.transformers.response(promise);
 
         // Make instance/instances from response
         promise = this.makeInstances(promise);

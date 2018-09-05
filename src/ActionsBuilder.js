@@ -7,7 +7,7 @@ import each from 'lodash/each';
 import merge from 'lodash/merge';
 import isFunction from 'lodash/isFunction';
 import Action from './Action';
-import Interceptors from './Interceptors';
+import Stages from './Stages';
 
 export default class ActionsBuilder {
   static defaults = {
@@ -37,8 +37,9 @@ export default class ActionsBuilder {
       {}
     );
 
-    // `Model` interceptors
-    this.interceptors = new Interceptors(Model);
+    // `Model` interceptors and transformers
+    this.interceptors = new Stages(Model, 'interceptors');
+    this.transformers = new Stages(Model, 'transformers');
   }
   
   /**
@@ -72,7 +73,7 @@ export default class ActionsBuilder {
       Model[name] = (...kwargs) => {
         // Extract `data` from arguments and pass it as param to `Action` constructor
         const data = isFunction(kwargs[0]) ? {} : kwargs.shift();
-        const action = new Action(Model, name, cfg, data, mappings, this.interceptors);
+        const action = new Action(Model, name, cfg, data, mappings, this.interceptors, this.transformers);
 
         return action.promise(...kwargs);
       };
@@ -95,7 +96,7 @@ export default class ActionsBuilder {
 
     each(this.actions, (cfg, name) => {
       Model.prototype[`$${name}`] = (...kwargs) => {
-        const action = new Action(Model, name, cfg, data, mappings, this.interceptors);
+        const action = new Action(Model, name, cfg, data, mappings, this.interceptors, this.transformers);
         
         return action.promise(...kwargs);
       };
