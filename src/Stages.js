@@ -39,13 +39,13 @@ export default class Stages {
     // Resource
     each(ReactResource[this.which], (i) => {
       if (isFunction(i.request)) config = config.then(i.request);
-      if (isFunction(i.requestError)) config = config.catch(i.requestError);
+      if (isFunction(i.requestError)) config = config.catch((e) => Promise.reject(i.requestError(e)));
     });
 
     // Model
     each(this.Model[this.which], (i) => {
       if (isFunction(i.request)) config = config.then(i.request);
-      if (isFunction(i.requestError)) config = config.catch(i.requestError);
+      if (isFunction(i.requestError)) config = config.catch((e) => Promise.reject(i.requestError(e)));
     });
 
     return config;
@@ -55,13 +55,13 @@ export default class Stages {
     // Resource
     each(ReactResource[this.which], (i) => {
       if (isFunction(i.response)) promise = promise.then(i.response);
-      if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
+      if (isFunction(i.responseError)) promise = promise.catch((e) => Promise.reject(i.responseError(e)));
     });
 
     // Model
     each(this.Model[this.which], (i) => {
       if (isFunction(i.response)) promise = promise.then(i.response);
-      if (isFunction(i.responseError)) promise = promise.catch(i.responseError);
+      if (isFunction(i.responseError)) promise = promise.catch((e) => Promise.reject(i.responseError(e)));
     });
 
     return promise;
