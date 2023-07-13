@@ -78,10 +78,11 @@ User.create({first_name: 'John', last_name: 'Doe'}, (response) => {
  * 
  * [User][CREATE][transformRequest] from:  Object {first_name: "John", last_name: "Doe"}
  * [User][CREATE][transformRequest] to:  Object {user: Object}
- * [User][CREATE][response] Model {id: 3, first_name: "John", last_name: "Doe", ...}
+ * [User][CREATE][response] User {id: 3, first_name: "John", last_name: "Doe", ...}
+
  * [User][QUERY][transformResponse] from: Object {count: 3, results: [Object, Object, Object]}
- * [User][QUERY][transformResponse] to: Object {count: 3, results: [Model, Model, Model]}
- * [User][QUERY][response] Object {count: 3, results: [Model, Model, Model]}
+ * [User][QUERY][transformResponse] to: Object {count: 3, results: [User, User, User]}
+ * [User][QUERY][response] Object {count: 3, results: [User, User, User]}
  */
 
 ```

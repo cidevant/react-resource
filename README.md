@@ -36,7 +36,7 @@ User.create({first_name: 'John', last_name: 'Doe'}, (user) => {
   console.log('[CLASS]', user.getName());
 });
 
-// Actions `create` as instance method
+// Action `create` as instance method
 const user = new User({first_name: 'Johnny', last_name: 'Bravo'});
 const promise = user.$create((user) => {
   console.log('[INSTANCE]', user.getName());
