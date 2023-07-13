@@ -51,7 +51,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Action = function () {
-  function Action(Model, name, config, data, mappings, interceptors) {
+  function Action(Model, name, config, data, mappings, interceptors, transformers) {
     _classCallCheck(this, Action);
 
     this.Model = Model; // `Model` class
@@ -60,6 +60,7 @@ var Action = function () {
     this.data = data; // `Model` instance data (usage: [action url construction, action request body])
     this.mappings = mappings; // for construction action url
     this.interceptors = interceptors; // `request` config and `response` data control
+    this.transformers = transformers;
   }
 
   /**
@@ -128,15 +129,18 @@ var Action = function () {
       var _this2 = this;
 
       var cfg = this.configure.apply(this, arguments);
+      cfg = this.interceptors.request(cfg); // Use `request` interceptor
+      cfg = this.transformers.request(cfg);
 
-      return this.interceptors.request(cfg) // Use `request` interceptor
-      .then(function (_ref) {
+      return cfg.then(function (_ref) {
         var url = _ref.url,
             options = _ref.options,
             resolveFn = _ref.resolveFn,
             rejectionFn = _ref.rejectionFn;
 
         var promise = (0, _request2.default)(url, options);
+
+        promise = _this2.transformers.response(promise);
 
         // Make instance/instances from response
         promise = _this2.makeInstances(promise);

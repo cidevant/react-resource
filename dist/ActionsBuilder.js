@@ -28,9 +28,9 @@ var _Action = require('./Action');
 
 var _Action2 = _interopRequireDefault(_Action);
 
-var _Interceptors = require('./Interceptors');
+var _Stages = require('./Stages');
 
-var _Interceptors2 = _interopRequireDefault(_Interceptors);
+var _Stages2 = _interopRequireDefault(_Stages);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -59,8 +59,9 @@ var ActionsBuilder = function () {
       return accumulator;
     }, {});
 
-    // `Model` interceptors
-    this.interceptors = new _Interceptors2.default(Model);
+    // `Model` interceptors and transformers
+    this.interceptors = new _Stages2.default(Model, 'interceptors');
+    this.transformers = new _Stages2.default(Model, 'transformers');
   }
 
   /**
@@ -108,7 +109,7 @@ var ActionsBuilder = function () {
 
           // Extract `data` from arguments and pass it as param to `Action` constructor
           var data = (0, _isFunction2.default)(kwargs[0]) ? {} : kwargs.shift();
-          var action = new _Action2.default(Model, name, cfg, data, mappings, _this2.interceptors);
+          var action = new _Action2.default(Model, name, cfg, data, mappings, _this2.interceptors, _this2.transformers);
 
           return action.promise.apply(action, kwargs);
         };
@@ -136,7 +137,7 @@ var ActionsBuilder = function () {
 
       (0, _each2.default)(this.actions, function (cfg, name) {
         Model.prototype['$' + name] = function () {
-          var action = new _Action2.default(Model, name, cfg, data, mappings, _this3.interceptors);
+          var action = new _Action2.default(Model, name, cfg, data, mappings, _this3.interceptors, _this3.transformers);
 
           return action.promise.apply(action, arguments);
         };
